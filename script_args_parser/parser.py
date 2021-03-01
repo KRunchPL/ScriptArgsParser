@@ -1,5 +1,5 @@
-import os
 import re
+import os
 from argparse import ArgumentParser
 from dataclasses import dataclass
 from typing import Any, Optional
@@ -85,11 +85,7 @@ class ArgumentsParser:
         self.arguments_definitions = arguments_definitions
         self.arguments = self._parse_toml_definitions()
         self.arguments_values = self._read_cli_arguments(cli_params)
-        for argument in self.arguments:
-            if self.arguments_values[argument.name] is None and argument.env_var is not None:
-                self.arguments_values[argument.name] = os.getenv(argument.env_var)
-            if self.arguments_values[argument.name] is None and argument.default_value is not None:
-                self.arguments_values[argument.name] = argument.default_value
+        self._fallback_values()
         self._convert_values()
 
     def _parse_toml_definitions(self) -> list[Argument]:
@@ -102,6 +98,13 @@ class ArgumentsParser:
             args, kwargs = argument.argparse_options
             cli_parser.add_argument(*args, **kwargs)
         return vars(cli_parser.parse_args(cli_params))
+
+    def _fallback_values(self) -> None:
+        for argument in self.arguments:
+            if self.arguments_values[argument.name] is None and argument.env_var is not None:
+                self.arguments_values[argument.name] = os.getenv(argument.env_var)
+            if self.arguments_values[argument.name] is None and argument.default_value is not None:
+                self.arguments_values[argument.name] = argument.default_value
 
     def _convert_values(self) -> None:
         for argument in self.arguments:
