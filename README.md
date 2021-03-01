@@ -13,3 +13,19 @@ In Python there are a lot of ways to consume cli parameters, even apart from bui
 * Environmental variable fallback is supported
 * Default value is supported
 * Human readable errors are returned
+
+## Planned work
+
+[ ] Add more list of tuples tests
+[ ] Write complex test cases
+[ ] Allow non-cli arguments
+[ ] Document possible types
+[ ] Add path type
+[ ] Add logging
+[ ] Allow custom argument types
+[ ] Generate usage
+[ ] Error handling
+[ ] Default and envs for list
+[ ] Default and envs for tuple
+[ ] TOML file validation
+[ ] Create from path
