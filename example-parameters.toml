@@ -1,0 +1,34 @@
+[name]
+description = "Your name"
+type = "str"
+cli_arg = "--my-name"
+
+[age]
+description = "Your age"
+type = "int"
+cli_arg = "--my-age"
+
+[first_time]
+description = "Whether it is first time you use this app"
+type = "switch"
+cli_arg = "--first-time"
+
+[favorite_colors]
+description = "Your favorite color, can be used multiple times"
+type = "list[str]"
+cli_arg = "--fav-color"
+
+[favorite_numbers]
+description = "Your favorite number, can be used multiple times"
+type = "list[int]"
+cli_arg = "--fav-num"
+
+[children]
+description = "Child name and the age, can be used multiple times"
+type = "list[tuple[str, int]]"
+cli_arg = "--child"
+
+[city_time]
+description = "City and years you live there in"
+type = "tuple[str, int]"
+cli_arg = "--location"
