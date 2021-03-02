@@ -32,3 +32,8 @@ cli_arg = "--child"
 description = "City and years you live there in"
 type = "tuple[str, int]"
 cli_arg = "--location"
+
+[picture]
+description = "Path to file with a picture"
+type = "path"
+cli_arg = "--picture"

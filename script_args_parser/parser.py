@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Optional, Union
 
 import toml
+import yaml
 
 
 @dataclass
@@ -84,7 +85,11 @@ class ArgumentsParser:
         'path': Path,
     }  #: Maps string values of types to actual converters
 
-    def __init__(self, arguments: list[Argument], cli_params: Optional[list[str]] = None) -> None:
+    def __init__(
+        self, arguments: list[Argument], cli_params: Optional[list[str]] = None,
+        user_values: Optional[dict[str, Any]] = None
+    ) -> None:
+        self.user_values = user_values or {}
         self.arguments = arguments
         self.arguments_values = self._read_cli_arguments(cli_params)
         self._fallback_values()
@@ -93,13 +98,22 @@ class ArgumentsParser:
 
     @classmethod
     def from_files(
-        cls, arguments_file: Union[str, Path], cli_params: Optional[list[str]] = None
+        cls, arguments_file: Union[str, Path], cli_params: Optional[list[str]] = None,
+        yaml_config: Optional[Union[str, Path]] = None
     ) -> 'ArgumentsParser':
         if isinstance(arguments_file, str):
             arguments_file = Path(arguments_file)
+        if isinstance(yaml_config, str):
+            yaml_config = Path(yaml_config)
+
         with arguments_file.open('r') as args_file:
             arguments = cls._parse_toml_definitions(args_file.read())
-        return cls(arguments, cli_params)
+
+        user_values = None
+        if yaml_config is not None:
+            with yaml_config.open('r') as yaml_file:
+                user_values = yaml.load(yaml_file)
+        return cls(arguments, cli_params, user_values)
 
     @staticmethod
     def _parse_toml_definitions(toml_string: str) -> list[Argument]:
@@ -115,6 +129,8 @@ class ArgumentsParser:
 
     def _fallback_values(self) -> None:
         for argument in self.arguments:
+            if self.arguments_values[argument.name] is None:
+                self.arguments_values[argument.name] = self.user_values.get(argument.name)
             if self.arguments_values[argument.name] is None and argument.env_var is not None:
                 self.arguments_values[argument.name] = os.getenv(argument.env_var)
             if self.arguments_values[argument.name] is None and argument.default_value is not None:

@@ -1,0 +1,13 @@
+age: 1500
+favorite_colors:
+  - blue
+  - green
+city_time:
+  - Warsaw
+  - 35
+children:
+  - - John
+    - 16
+  - - Alan
+    - 15
+picture: ./setup.cfg
