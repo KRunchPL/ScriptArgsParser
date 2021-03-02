@@ -1,71 +1,77 @@
 import os
 import pytest
+
 from script_args_parser import ArgumentsParser
+from script_args_parser.parser import Argument
+from tests.common_fixtures import *  # noqa: F401, F403
 
 
 @pytest.fixture
-def toml_definition():
-    return """
-[list]
-description = "List value"
-type = "list[int]"
-cli_arg = "--list-element"
-"""
+def env_var_name():
+    return 'UT_LIST_ENV_VALUE'
 
 
 @pytest.fixture
-def toml_definition_str():
-    return """
-[list]
-description = "List value"
-type = "list[str]"
-cli_arg = "--list-element"
-"""
+def arguments_definition():
+    return [Argument(
+        name='list',
+        description='List value',
+        type='list[str]',
+        cli_arg='--list-element',
+    )]
 
 
 @pytest.fixture
-def list_env_var():
-    old_environ = dict(os.environ)
-    os.environ['UT_LIST_ENV_VALUE'] = ''
-    yield 'UT_LIST_ENV_VALUE'
-    os.environ.clear()
-    os.environ.update(old_environ)
+def arguments_definition_int():
+    return [Argument(
+        name='list',
+        description='List value',
+        type='list[int]',
+        cli_arg='--list-element',
+    )]
 
 
-def test_no_value(toml_definition):
+@pytest.fixture
+def arguments_definition_int_with_env(arguments_definition_int, env_var_name):
+    arguments_definition_int[0].default_value = '10'
+    arguments_definition_int[0].env_var = env_var_name
+    return arguments_definition_int
+
+
+def test_no_value(arguments_definition):
     cli = []
-    parser = ArgumentsParser(toml_definition, cli)
+    parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['list'] is None
 
 
-def test_single_value(toml_definition):
+def test_single_value(arguments_definition):
     cli = ['--list-element', '123']
-    parser = ArgumentsParser(toml_definition, cli)
-    assert parser.arguments_values['list'] == [123]
+    parser = ArgumentsParser(arguments_definition, cli)
+    assert parser.arguments_values['list'] == ['123']
 
 
-def test_multiple_values(toml_definition):
+def test_multiple_values(arguments_definition):
     cli = ['--list-element', '123', '--list-element', '1410']
-    parser = ArgumentsParser(toml_definition, cli)
-    assert parser.arguments_values['list'] == [123, 1410]
+    parser = ArgumentsParser(arguments_definition, cli)
+    assert parser.arguments_values['list'] == ['123', '1410']
 
 
-def test_single_empty_value(toml_definition_str):
+def test_single_empty_value(arguments_definition):
     cli = ['--list-element', '']
-    parser = ArgumentsParser(toml_definition_str, cli)
+    parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['list'] == ['']
 
 
-def test_multiple_empty_values(toml_definition_str):
+def test_multiple_empty_values(arguments_definition):
     cli = ['--list-element', '', '--list-element', '1410', '--list-element', '']
-    parser = ArgumentsParser(toml_definition_str, cli)
+    parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['list'] == ['', '1410', '']
 
 
-def test_switch_but_no_value(toml_definition):
+def test_switch_but_no_value(arguments_definition):
     cli = ['--list-element']
     with pytest.raises(SystemExit):
-        ArgumentsParser(toml_definition, cli)
+        ArgumentsParser(arguments_definition, cli)
 
 
 @pytest.mark.parametrize('default_value, expected_list', [
@@ -93,16 +99,16 @@ def test_switch_but_no_value(toml_definition):
     ("''", ['']),
     (" '  c '  ", ['  c ']),
     (" '  c ' ;  ;   '  ' ", ['  c ', '', '  ']),
-    ('\\"123\\"', ['123']),
-    ('\\"123\\"; 1410', ['123', '1410']),
-    ('\\"\\"', ['']),
-    (' \\"  c \\"  ', ['  c ']),
-    (' \\"  c \\" ;  ;   \\"  \\" ', ['  c ', '', '  ']),
+    ('"123"', ['123']),
+    ('"123"; 1410', ['123', '1410']),
+    ('""', ['']),
+    (' "  c "  ', ['  c ']),
+    (' "  c " ;  ;   "  " ', ['  c ', '', '  ']),
 ])
-def test_no_cli_default_set(toml_definition_str, default_value, expected_list):
-    toml = toml_definition_str + f'default_value = "{default_value}"'
+def test_no_cli_default_set(arguments_definition, default_value, expected_list):
+    arguments_definition[0].default_value = default_value
     cli = []
-    parser = ArgumentsParser(toml, cli)
+    parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['list'] == expected_list
 
 
@@ -110,10 +116,10 @@ def test_no_cli_default_set(toml_definition_str, default_value, expected_list):
     ('123', [123]),
     ('123; 1410', [123, 1410]),
 ])
-def test_no_cli_default_set_parsing(toml_definition, default_value, expected_list):
-    toml = toml_definition + f'default_value = "{default_value}"'
+def test_no_cli_default_set_parsing(arguments_definition_int, default_value, expected_list):
+    arguments_definition_int[0].default_value = default_value
     cli = []
-    parser = ArgumentsParser(toml, cli)
+    parser = ArgumentsParser(arguments_definition_int, cli)
     assert parser.arguments_values['list'] == expected_list
 
 
@@ -148,11 +154,10 @@ def test_no_cli_default_set_parsing(toml_definition, default_value, expected_lis
     (' "  c "  ', ['  c ']),
     (' "  c " ;  ;   "  " ', ['  c ', '', '  ']),
 ])
-def test_no_cli_env_set(toml_definition_str, list_env_var, env_value, expected_list):
-    os.environ[list_env_var] = env_value
-    toml = toml_definition_str + f'default_value = "10"\nenv_var = "{list_env_var}"'
+def test_no_cli_env_set(arguments_definition_with_env, env_var, env_value, expected_list):
+    os.environ[env_var] = env_value
     cli = []
-    parser = ArgumentsParser(toml, cli)
+    parser = ArgumentsParser(arguments_definition_with_env, cli)
     assert parser.arguments_values['list'] == expected_list
 
 
@@ -162,9 +167,8 @@ def test_no_cli_env_set(toml_definition_str, list_env_var, env_value, expected_l
     ('123; "1410"; 2020', [123, 1410, 2020]),
     ('123; " 1410 "; 2020', [123, 1410, 2020]),
 ])
-def test_no_cli_env_set_multiple_values(toml_definition, list_env_var, env_value, expected_list):
-    os.environ[list_env_var] = env_value
-    toml = toml_definition + f'default_value = "10"\nenv_var = "{list_env_var}"'
+def test_no_cli_env_set_multiple_values(arguments_definition_int_with_env, env_var, env_value, expected_list):
+    os.environ[env_var] = env_value
     cli = []
-    parser = ArgumentsParser(toml, cli)
+    parser = ArgumentsParser(arguments_definition_int_with_env, cli)
     assert parser.arguments_values['list'] == expected_list

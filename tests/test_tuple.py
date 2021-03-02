@@ -1,161 +1,184 @@
 import os
 import pytest
+
 from script_args_parser import ArgumentsParser
+from script_args_parser.parser import Argument
+from tests.common_fixtures import *  # noqa: F401, F403
 
 
 @pytest.fixture
-def toml_definition():
-    return """
-[tuple]
-description = "Tuple value"
-cli_arg = "--some-tuple"
-"""
+def env_var_name():
+    return 'UT_TUPLE_ENV_VALUE'
 
 
 @pytest.fixture
-def toml_definition_single_str(toml_definition):
-    return toml_definition+'type = "tuple[str]"\n'
+def arguments_definition_single_str():
+    return [Argument(
+        name='tuple',
+        description='Tuple value',
+        type='tuple[str]',
+        cli_arg='--some-tuple',
+    )]
 
 
 @pytest.fixture
-def toml_definition_str_int_bool(toml_definition):
-    return toml_definition+'type = "tuple[str, int, bool]"\n'
+def arguments_definition_triple_str():
+    return [Argument(
+        name='tuple',
+        description='Tuple value',
+        type='tuple[str, str, str]',
+        cli_arg='--some-tuple',
+    )]
 
 
 @pytest.fixture
-def toml_definition_triple_str(toml_definition):
-    return toml_definition+'type = "tuple[str, str, str]"\n'
+def arguments_definition_str_int_bool():
+    return [Argument(
+        name='tuple',
+        description='Tuple value',
+        type='tuple[str, int, bool]',
+        cli_arg='--some-tuple',
+    )]
 
 
 @pytest.fixture
-def tuple_env_var():
-    old_environ = dict(os.environ)
-    os.environ['UT_TUPLE_ENV_VALUE'] = ''
-    yield 'UT_TUPLE_ENV_VALUE'
-    os.environ.clear()
-    os.environ.update(old_environ)
+def arguments_definition_single_str_with_env(arguments_definition_single_str, env_var_name):
+    arguments_definition_single_str[0].default_value = '10'
+    arguments_definition_single_str[0].env_var = env_var_name
+    return arguments_definition_single_str
 
 
-def test_no_value(toml_definition_single_str):
+@pytest.fixture
+def arguments_definition_triple_str_with_env(arguments_definition_triple_str, env_var_name):
+    arguments_definition_triple_str[0].default_value = '10'
+    arguments_definition_triple_str[0].env_var = env_var_name
+    return arguments_definition_triple_str
+
+
+@pytest.fixture
+def arguments_definition_str_int_bool_with_env(arguments_definition_str_int_bool, env_var_name):
+    arguments_definition_str_int_bool[0].default_value = '10'
+    arguments_definition_str_int_bool[0].env_var = env_var_name
+    return arguments_definition_str_int_bool
+
+
+def test_no_value(arguments_definition_single_str):
     cli = []
-    parser = ArgumentsParser(toml_definition_single_str, cli)
+    parser = ArgumentsParser(arguments_definition_single_str, cli)
     assert parser.arguments_values['tuple'] is None
 
 
-def test_single_value(toml_definition_single_str):
+def test_single_value(arguments_definition_single_str):
     cli = ['--some-tuple', 'String Value']
-    parser = ArgumentsParser(toml_definition_single_str, cli)
+    parser = ArgumentsParser(arguments_definition_single_str, cli)
     assert parser.arguments_values['tuple'] == ['String Value']
 
 
-def test_multiple_values_tuple(toml_definition_str_int_bool):
-    cli = ['--some-tuple', 'String Value', '123', 'True']
-    parser = ArgumentsParser(toml_definition_str_int_bool, cli)
-    assert parser.arguments_values['tuple'] == ['String Value', 123, True]
-
-
-def test_switch_but_no_value(toml_definition_single_str):
+def test_switch_but_no_value(arguments_definition_single_str):
     cli = ['--some-tuple']
     with pytest.raises(SystemExit):
-        ArgumentsParser(toml_definition_single_str, cli)
+        ArgumentsParser(arguments_definition_single_str, cli)
 
 
-def test_no_cli_default_single_value(toml_definition_single_str):
-    toml = toml_definition_single_str + 'default_value = "\'Some default\'"'
-    cli = []
-    parser = ArgumentsParser(toml, cli)
-    assert parser.arguments_values['tuple'] == ['Some default']
-
-
-def test_no_cli_default_multiple_values_tuple(toml_definition_str_int_bool):
-    toml = toml_definition_str_int_bool + 'default_value = "\'Some default\' 123 True"'
-    cli = []
-    parser = ArgumentsParser(toml, cli)
-    assert parser.arguments_values['tuple'] == ['Some default', 123, True]
-
-
-def test_no_cli_env_single_empty_value(toml_definition_single_str, tuple_env_var):
-    os.environ[tuple_env_var] = ''
-    toml = toml_definition_single_str + f'default_value = "Some default"\nenv_var = "{tuple_env_var}"'
-    cli = []
-    parser = ArgumentsParser(toml, cli)
-    assert parser.arguments_values['tuple'] == ['']
-
-
-def test_no_cli_env_single_value(toml_definition_single_str, tuple_env_var):
-    os.environ[tuple_env_var] = '"Some from env"'
-    toml = toml_definition_single_str + f'default_value = "Some default"\nenv_var = "{tuple_env_var}"'
-    cli = []
-    parser = ArgumentsParser(toml, cli)
-    assert parser.arguments_values['tuple'] == ['Some from env']
-
-
-def test_no_cli_env_multiple_values_tuple(toml_definition_str_int_bool, tuple_env_var):
-    os.environ[tuple_env_var] = '"Some from env" 123 True'
-    toml = toml_definition_str_int_bool + f'default_value = "Some default"\nenv_var = "{tuple_env_var}"'
-    cli = []
-    parser = ArgumentsParser(toml, cli)
-    assert parser.arguments_values['tuple'] == ['Some from env', 123, True]
-
-
-def test_not_enough_values_cli(toml_definition_str_int_bool):
+def test_not_enough_values_cli(arguments_definition_triple_str):
     cli = ['--some-tuple', 'String Value', '123']
     with pytest.raises(SystemExit):
-        ArgumentsParser(toml_definition_str_int_bool, cli)
+        ArgumentsParser(arguments_definition_triple_str, cli)
 
 
-def test_not_enough_values_default(toml_definition_str_int_bool):
-    toml = toml_definition_str_int_bool + 'default_value = "\'Some default\' 123"'
-    cli = []
-    with pytest.raises(RuntimeError):
-        ArgumentsParser(toml, cli)
-
-
-def test_not_enough_values_env(toml_definition_str_int_bool, tuple_env_var):
-    os.environ[tuple_env_var] = '"Some from env" 123'
-    toml = toml_definition_str_int_bool + f'env_var = "{tuple_env_var}"'
-    cli = []
-    with pytest.raises(RuntimeError):
-        ArgumentsParser(toml, cli)
-
-
-def test_too_much_values_cli(toml_definition_str_int_bool):
+def test_too_much_values_cli(arguments_definition_triple_str):
     cli = ['--some-tuple', 'String Value', '123', 'True', 'Other']
     with pytest.raises(SystemExit):
-        ArgumentsParser(toml_definition_str_int_bool, cli)
+        ArgumentsParser(arguments_definition_triple_str, cli)
 
 
-def test_too_much_values_default(toml_definition_str_int_bool):
-    toml = toml_definition_str_int_bool + 'default_value = "\'Some default\', 123, True, Other"'
+@pytest.mark.parametrize('cli_values, expected_list', [
+    (['String Value', '123', 'True'], ['String Value', 123, True]),
+    (['', '123', 'True'], ['', 123, True]),
+    (['', '123', ''], ['', 123, False]),
+])
+def test_parsing_values(arguments_definition_str_int_bool, cli_values, expected_list):
+    cli = ['--some-tuple'] + cli_values
+    parser = ArgumentsParser(arguments_definition_str_int_bool, cli)
+    assert parser.arguments_values['tuple'] == expected_list
+
+
+@pytest.mark.parametrize('default_value, expected_value', [
+    ('String_Value', 'String_Value'),
+    ('"String Value"', 'String Value'),
+    ("'String Value'", 'String Value'),
+])
+def test_no_cli_default_single_value(arguments_definition_single_str, default_value, expected_value):
+    arguments_definition_single_str[0].default_value = default_value
+    cli = []
+    parser = ArgumentsParser(arguments_definition_single_str, cli)
+    assert parser.arguments_values['tuple'] == [expected_value]
+
+
+def test_no_cli_default_not_enough_values(arguments_definition_triple_str):
+    arguments_definition_triple_str[0].default_value = "'Some default' 123"
     cli = []
     with pytest.raises(RuntimeError):
-        ArgumentsParser(toml, cli)
+        ArgumentsParser(arguments_definition_triple_str, cli)
 
 
-def test_too_much_values_env(toml_definition_str_int_bool, tuple_env_var):
-    os.environ[tuple_env_var] = '"Some from env" 123 True Other'
-    toml = toml_definition_str_int_bool + f'env_var = "{tuple_env_var}"'
+def test_no_cli_default_too_much_values(arguments_definition_triple_str):
+    arguments_definition_triple_str[0].default_value = "'Some default', 123, True, Other"
     cli = []
     with pytest.raises(RuntimeError):
-        ArgumentsParser(toml, cli)
+        ArgumentsParser(arguments_definition_triple_str, cli)
 
 
-def test_multiple_empty_values_tuple(toml_definition_triple_str):
-    cli = ['--some-tuple', '', '123', '']
-    parser = ArgumentsParser(toml_definition_triple_str, cli)
-    assert parser.arguments_values['tuple'] == ['', '123', '']
-
-
-def test_no_cli_default_multiple_empty_values_tuple(toml_definition_triple_str):
-    toml = toml_definition_triple_str + 'default_value = "\'\' 123 \'\' "'
+@pytest.mark.parametrize('default_value, expected_list', [
+    ("'String Value' 123 True", ['String Value', 123, True]),
+    ("'' 123 True", ['', 123, True]),
+    ("'' '123' ''", ['', 123, False]),
+])
+def test_no_cli_default_parsing_values(arguments_definition_str_int_bool, default_value, expected_list):
+    arguments_definition_str_int_bool[0].default_value = default_value
     cli = []
-    parser = ArgumentsParser(toml, cli)
-    assert parser.arguments_values['tuple'] == ['', '123', '']
+    parser = ArgumentsParser(arguments_definition_str_int_bool, cli)
+    assert parser.arguments_values['tuple'] == expected_list
 
 
-def test_no_cli_env_multiple_empty_values_tuple(toml_definition_triple_str, tuple_env_var):
-    os.environ[tuple_env_var] = '"" 123 "" '
-    toml = toml_definition_triple_str + f'default_value = "Some default"\nenv_var = "{tuple_env_var}"'
+@pytest.mark.parametrize('env_value, expected_value', [
+    ('String_Value', 'String_Value'),
+    ('"String Value"', 'String Value'),
+    ("'String Value'", 'String Value'),
+    ('', ''),
+])
+def test_no_cli_env_single_value(
+    arguments_definition_single_str_with_env, env_var, env_value, expected_value
+):
+    os.environ[env_var] = env_value
     cli = []
-    parser = ArgumentsParser(toml, cli)
-    assert parser.arguments_values['tuple'] == ['', '123', '']
+    parser = ArgumentsParser(arguments_definition_single_str_with_env, cli)
+    assert parser.arguments_values['tuple'] == [expected_value]
+
+
+def test_no_cli_env_not_enough_values(arguments_definition_triple_str_with_env, env_var):
+    os.environ[env_var] = "'Some default' 123"
+    cli = []
+    with pytest.raises(RuntimeError):
+        ArgumentsParser(arguments_definition_triple_str_with_env, cli)
+
+
+def test_no_cli_env_too_much_values(arguments_definition_triple_str_with_env, env_var):
+    os.environ[env_var] = "'Some default', 123, True, Other"
+    cli = []
+    with pytest.raises(RuntimeError):
+        ArgumentsParser(arguments_definition_triple_str_with_env, cli)
+
+
+@pytest.mark.parametrize('env_value, expected_list', [
+    ("'String Value' 123 True", ['String Value', 123, True]),
+    ("'' 123 True", ['', 123, True]),
+    ("'' '123' ''", ['', 123, False]),
+])
+def test_no_cli_env_parsing_values(
+    arguments_definition_str_int_bool_with_env, env_var, env_value, expected_list
+):
+    os.environ[env_var] = env_value
+    cli = []
+    parser = ArgumentsParser(arguments_definition_str_int_bool_with_env, cli)
+    assert parser.arguments_values['tuple'] == expected_list

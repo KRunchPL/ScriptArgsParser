@@ -1,85 +1,78 @@
 import os
+import pytest
 from pathlib import Path
 
-import pytest
-
 from script_args_parser import ArgumentsParser
+from script_args_parser.parser import Argument
+from tests.common_fixtures import *  # noqa: F401, F403
 
 
 @pytest.fixture
-def toml_definition():
-    return """
-[path]
-description = "Path value"
-type = "path"
-cli_arg = "--file-path"
-"""
+def env_var_name():
+    return 'UT_PATH_ENV_VALUE'
 
 
 @pytest.fixture
-def path_env_var():
-    old_environ = dict(os.environ)
-    os.environ['UT_PATH_ENV_VALUE'] = ''
-    yield 'UT_PATH_ENV_VALUE'
-    os.environ.clear()
-    os.environ.update(old_environ)
+def arguments_definition():
+    return [Argument(
+        name='path',
+        description='Path value',
+        type='path',
+        cli_arg='--file-path',
+    )]
 
 
-def test_no_value(toml_definition):
+def test_no_value(arguments_definition):
     cli = []
-    parser = ArgumentsParser(toml_definition, cli)
+    parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['path'] is None
 
 
-def test_single_value(toml_definition):
-    cli = ['--file-path', './LICENSE']
-    parser = ArgumentsParser(toml_definition, cli)
-    assert parser.arguments_values['path'] == Path('./LICENSE')
+def test_value_empty_string(arguments_definition):
+    cli = ['--file-path', '']
+    parser = ArgumentsParser(arguments_definition, cli)
+    assert parser.arguments_values['path'] == Path('.')
 
 
-def test_multiple_values(toml_definition):
+@pytest.mark.parametrize('cli_value, expected_value', [
+    ('./LICENSE', Path('./LICENSE')),
+    ('', Path('.')),
+])
+def test_single_value(arguments_definition, cli_value, expected_value):
+    cli = ['--file-path', cli_value]
+    parser = ArgumentsParser(arguments_definition, cli)
+    assert parser.arguments_values['path'] == expected_value
+
+
+def test_multiple_values(arguments_definition):
     cli = ['--file-path', './LICENSE', '--file-path', './README.md']
-    parser = ArgumentsParser(toml_definition, cli)
+    parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['path'] == Path('./README.md')
 
 
-def test_switch_but_no_value(toml_definition):
+def test_switch_but_no_value(arguments_definition):
     cli = ['--file-path']
     with pytest.raises(SystemExit):
-        ArgumentsParser(toml_definition, cli)
+        ArgumentsParser(arguments_definition, cli)
 
 
-def test_no_cli_default_set(toml_definition):
-    toml = toml_definition + 'default_value = "./LICENSE"'
+@pytest.mark.parametrize('default_value, expected_value', [
+    ('./LICENSE', Path('./LICENSE')),
+    ('', Path('.')),
+])
+def test_no_cli_default_set(arguments_definition, default_value, expected_value):
+    arguments_definition[0].default_value = default_value
     cli = []
-    parser = ArgumentsParser(toml, cli)
-    assert parser.arguments_values['path'] == Path('./LICENSE')
+    parser = ArgumentsParser(arguments_definition, cli)
+    assert parser.arguments_values['path'] == expected_value
 
 
-def test_no_cli_env_set(toml_definition, path_env_var):
-    os.environ[path_env_var] = './LICENSE'
-    toml = toml_definition + f'default_value = "Some default"\nenv_var = "{path_env_var}"'
+@pytest.mark.parametrize('env_value, expected_value', [
+    ('./LICENSE', Path('./LICENSE')),
+    ('', Path('.')),
+])
+def test_no_cli_env_set(arguments_definition_with_env, env_var, env_value, expected_value):
+    os.environ[env_var] = env_value
     cli = []
-    parser = ArgumentsParser(toml, cli)
-    assert parser.arguments_values['path'] == Path('./LICENSE')
-
-
-def test_value_empty_string(toml_definition):
-    cli = ['--file-path', '']
-    parser = ArgumentsParser(toml_definition, cli)
-    assert parser.arguments_values['path'] == Path('.')
-
-
-def test_default_value_empty_string(toml_definition):
-    toml = toml_definition + 'default_value = ""'
-    cli = []
-    parser = ArgumentsParser(toml, cli)
-    assert parser.arguments_values['path'] == Path('.')
-
-
-def test_env_value_empty_string(toml_definition, path_env_var):
-    os.environ[path_env_var] = ''
-    toml = toml_definition + f'default_value = ""\nenv_var = "{path_env_var}"'
-    cli = []
-    parser = ArgumentsParser(toml, cli)
-    assert parser.arguments_values['path'] == Path('.')
+    parser = ArgumentsParser(arguments_definition_with_env, cli)
+    assert parser.arguments_values['path'] == expected_value

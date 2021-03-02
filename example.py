@@ -1,8 +1,5 @@
 from script_args_parser import ArgumentsParser
 
 
-with open('example-parameters.toml', 'r') as params_file:
-    toml_definition = params_file.read()
-
-parser = ArgumentsParser(toml_definition)
+parser = ArgumentsParser.from_files('example-parameters.toml')
 print(parser.arguments_values)

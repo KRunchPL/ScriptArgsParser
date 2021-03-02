@@ -4,7 +4,7 @@ import shlex
 from argparse import ArgumentParser
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import toml
 
@@ -84,16 +84,26 @@ class ArgumentsParser:
         'path': Path,
     }  #: Maps string values of types to actual converters
 
-    def __init__(self, arguments_definitions: str, cli_params: Optional[list[str]] = None) -> None:
-        self.arguments_definitions = arguments_definitions
-        self.arguments = self._parse_toml_definitions()
+    def __init__(self, arguments: list[Argument], cli_params: Optional[list[str]] = None) -> None:
+        self.arguments = arguments
         self.arguments_values = self._read_cli_arguments(cli_params)
         self._fallback_values()
         self._calculate_lists_and_tuples()
         self._convert_values()
 
-    def _parse_toml_definitions(self) -> list[Argument]:
-        parsed_toml = toml.loads(self.arguments_definitions)
+    @classmethod
+    def from_files(
+        cls, arguments_file: Union[str, Path], cli_params: Optional[list[str]] = None
+    ) -> 'ArgumentsParser':
+        if isinstance(arguments_file, str):
+            arguments_file = Path(arguments_file)
+        with arguments_file.open('r') as args_file:
+            arguments = cls._parse_toml_definitions(args_file.read())
+        return cls(arguments, cli_params)
+
+    @staticmethod
+    def _parse_toml_definitions(toml_string: str) -> list[Argument]:
+        parsed_toml = toml.loads(toml_string)
         return [Argument(name=arg_name, **arg_def) for arg_name, arg_def in parsed_toml.items()]
 
     def _read_cli_arguments(self, cli_params: list[str] = None) -> dict[str, Any]:
