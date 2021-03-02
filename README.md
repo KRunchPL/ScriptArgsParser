@@ -25,21 +25,22 @@ In Python there are a lot of ways to consume cli parameters, starting from built
 
 Work that still need to be done prior to v1.0
 
+- [x] Default and envs for list
+- [x] Default and envs for tuple
+- [ ] Default and envs for list of tuples
 - [ ] Add more list of tuples tests
-- [ ] Write complex test cases
+- [ ] Add path type (with tests)
+- [ ] Write some complex test cases
+- [ ] Create from path
+- [ ] Support config file
 - [ ] Allow non-cli arguments
 - [ ] Document possible types
-- [ ] Add path type
 - [ ] Add logging
 - [ ] Allow custom argument types
 - [ ] Generate usage
 - [ ] Error handling
-- [ ] Default and envs for list
-- [ ] Default and envs for tuple
 - [ ] TOML file validation
-- [ ] Create from path
 - [ ] CI/CD
-- [ ] Support config file
 
 ## Contributing
 
