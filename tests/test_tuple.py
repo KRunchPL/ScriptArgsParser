@@ -60,34 +60,30 @@ def test_switch_but_no_value(toml_definition_single_str):
         ArgumentsParser(toml_definition_single_str, cli)
 
 
-@pytest.mark.skip('Not implemented')
 def test_no_cli_default_single_value(toml_definition_single_str):
-    toml = toml_definition_single_str + 'default_value = "Some default"'
+    toml = toml_definition_single_str + 'default_value = "\'Some default\'"'
     cli = []
     parser = ArgumentsParser(toml, cli)
     assert parser.arguments_values['tuple'] == ['Some default']
 
 
-@pytest.mark.skip('Not implemented')
 def test_no_cli_default_multiple_values_tuple(toml_definition_str_int_bool):
-    toml = toml_definition_str_int_bool + 'default_value = "Some default, 123, True"'
+    toml = toml_definition_str_int_bool + 'default_value = "\'Some default\' 123 True"'
     cli = []
     parser = ArgumentsParser(toml, cli)
-    assert parser.arguments_values['tuple'] == ['String Value', 123, True]
+    assert parser.arguments_values['tuple'] == ['Some default', 123, True]
 
 
-@pytest.mark.skip('Not implemented')
 def test_no_cli_env_single_value(toml_definition_single_str, tuple_env_var):
-    os.environ[tuple_env_var] = 'Some from env'
+    os.environ[tuple_env_var] = '"Some from env"'
     toml = toml_definition_single_str + f'default_value = "Some default"\nenv_var = "{tuple_env_var}"'
     cli = []
     parser = ArgumentsParser(toml, cli)
     assert parser.arguments_values['tuple'] == ['Some from env']
 
 
-@pytest.mark.skip('Not implemented')
 def test_no_cli_env_multiple_values_tuple(toml_definition_str_int_bool, tuple_env_var):
-    os.environ[tuple_env_var] = 'Some from env, 123, True'
+    os.environ[tuple_env_var] = '"Some from env" 123 True'
     toml = toml_definition_str_int_bool + f'default_value = "Some default"\nenv_var = "{tuple_env_var}"'
     cli = []
     parser = ArgumentsParser(toml, cli)
@@ -100,20 +96,18 @@ def test_not_enough_values_cli(toml_definition_str_int_bool):
         ArgumentsParser(toml_definition_str_int_bool, cli)
 
 
-@pytest.mark.skip('Not implemented')
 def test_not_enough_values_default(toml_definition_str_int_bool):
-    toml = toml_definition_str_int_bool + 'default_value = "Some default, 123"'
+    toml = toml_definition_str_int_bool + 'default_value = "\'Some default\' 123"'
     cli = []
-    with pytest.raises(SystemExit):
+    with pytest.raises(RuntimeError):
         ArgumentsParser(toml, cli)
 
 
-@pytest.mark.skip('Not implemented')
 def test_not_enough_values_env(toml_definition_str_int_bool, tuple_env_var):
-    os.environ[tuple_env_var] = 'Some from env, 123'
+    os.environ[tuple_env_var] = '"Some from env" 123'
     toml = toml_definition_str_int_bool + f'env_var = "{tuple_env_var}"'
     cli = []
-    with pytest.raises(SystemExit):
+    with pytest.raises(RuntimeError):
         ArgumentsParser(toml, cli)
 
 
@@ -123,20 +117,18 @@ def test_too_much_values_cli(toml_definition_str_int_bool):
         ArgumentsParser(toml_definition_str_int_bool, cli)
 
 
-@pytest.mark.skip('Not implemented')
 def test_too_much_values_default(toml_definition_str_int_bool):
-    toml = toml_definition_str_int_bool + 'default_value = "Some default, 123, True, Other"'
+    toml = toml_definition_str_int_bool + 'default_value = "\'Some default\', 123, True, Other"'
     cli = []
-    with pytest.raises(SystemExit):
+    with pytest.raises(RuntimeError):
         ArgumentsParser(toml, cli)
 
 
-@pytest.mark.skip('Not implemented')
 def test_too_much_values_env(toml_definition_str_int_bool, tuple_env_var):
-    os.environ[tuple_env_var] = 'Some from env, 123, True, Other'
+    os.environ[tuple_env_var] = '"Some from env" 123 True Other'
     toml = toml_definition_str_int_bool + f'env_var = "{tuple_env_var}"'
     cli = []
-    with pytest.raises(SystemExit):
+    with pytest.raises(RuntimeError):
         ArgumentsParser(toml, cli)
 
 
@@ -146,17 +138,15 @@ def test_multiple_empty_values_tuple(toml_definition_triple_str):
     assert parser.arguments_values['tuple'] == ['', '123', '']
 
 
-@pytest.mark.skip('Not implemented')
 def test_no_cli_default_multiple_empty_values_tuple(toml_definition_triple_str):
-    toml = toml_definition_triple_str + 'default_value = ", 123, "'
+    toml = toml_definition_triple_str + 'default_value = "\'\' 123 \'\' "'
     cli = []
     parser = ArgumentsParser(toml, cli)
     assert parser.arguments_values['tuple'] == ['', '123', '']
 
 
-@pytest.mark.skip('Not implemented')
 def test_no_cli_env_multiple_empty_values_tuple(toml_definition_triple_str, tuple_env_var):
-    os.environ[tuple_env_var] = ', 123, '
+    os.environ[tuple_env_var] = '"" 123 "" '
     toml = toml_definition_triple_str + f'default_value = "Some default"\nenv_var = "{tuple_env_var}"'
     cli = []
     parser = ArgumentsParser(toml, cli)

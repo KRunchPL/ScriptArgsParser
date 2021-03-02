@@ -1,5 +1,6 @@
-import re
 import os
+import re
+import shlex
 from argparse import ArgumentParser
 from dataclasses import dataclass
 from typing import Any, Optional
@@ -86,6 +87,7 @@ class ArgumentsParser:
         self.arguments = self._parse_toml_definitions()
         self.arguments_values = self._read_cli_arguments(cli_params)
         self._fallback_values()
+        self._calculate_lists_and_tuples()
         self._convert_values()
 
     def _parse_toml_definitions(self) -> list[Argument]:
@@ -105,6 +107,27 @@ class ArgumentsParser:
                 self.arguments_values[argument.name] = os.getenv(argument.env_var)
             if self.arguments_values[argument.name] is None and argument.default_value is not None:
                 self.arguments_values[argument.name] = argument.default_value
+
+    def _calculate_lists_and_tuples(self) -> None:
+        for argument in self.arguments:
+            argument_value = self.arguments_values[argument.name]
+            if not argument.is_list and not argument.is_tuple:
+                continue
+            if argument_value is None or not isinstance(argument_value, str):
+                continue
+            if argument.is_list and not argument.is_tuple:
+                pass
+            elif not argument.is_list and argument.is_tuple:
+                self.arguments_values[argument.name] = shlex.split(argument_value)
+                expected_number = len(argument.tuple_types)
+                actual_number = len(self.arguments_values[argument.name])
+                if actual_number != expected_number:
+                    raise RuntimeError(
+                        f'Tuple {argument.name} expected {expected_number} values and got {actual_number}: '
+                        f'{argument_value}.'
+                    )
+            elif argument.is_list and argument.is_tuple:
+                pass
 
     def _convert_values(self) -> None:
         for argument in self.arguments:
