@@ -116,7 +116,22 @@ class ArgumentsParser:
             if argument_value is None or not isinstance(argument_value, str):
                 continue
             if argument.is_list and not argument.is_tuple:
-                pass
+                if argument_value == '':
+                    self.arguments_values[argument.name] = ['']
+                    continue
+                argument_value = ' ' + argument_value + ' '
+                while argument_value.find(';;') != -1:
+                    argument_value = argument_value.replace(';;', '; ;', 1)
+                parser = shlex.shlex(argument_value)
+                parser.whitespace_split = True
+                parser.whitespace = ';'
+                self.arguments_values[argument.name] = []
+                for value in parser:
+                    parsed_value = shlex.split(value)
+                    if len(parsed_value) == 0:
+                        self.arguments_values[argument.name].append('')
+                    else:
+                        self.arguments_values[argument.name].append(parsed_value[0])
             elif not argument.is_list and argument.is_tuple:
                 self.arguments_values[argument.name] = shlex.split(argument_value)
                 expected_number = len(argument.tuple_types)

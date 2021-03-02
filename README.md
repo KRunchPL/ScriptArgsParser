@@ -6,7 +6,7 @@ This library is meant to provide an easy way to consume arguments for scripts in
 
 In Python there are a lot of ways to consume cli parameters, starting from built-in parsers finishing at libraries like docopt. But unfortunately during my adventure I encountered a few problems that were not solvable just by using one of them. Few of those problems:
 
-* use environment variable as a fallback when cli option not specified;
+* get values from multiple sources: cli, config file, environment variable, default;
 * convert given variable according to argument definition;
 * all argument information (cli option, fallback env var, conversion type, default value etc.) defined in one place;
 * definitions written outside the code, so the script is kept clean and simple;
@@ -16,6 +16,7 @@ In Python there are a lot of ways to consume cli parameters, starting from built
 
 * Parameters defined in both human- and computer-readable format outside of the code, in one place
 * Argument values converted to given format (predefined or custom)
+* Config file fallback
 * Environmental variable fallback
 * Default values
 * Human readable errors
@@ -38,6 +39,7 @@ Work that still need to be done prior to v1.0
 - [ ] TOML file validation
 - [ ] Create from path
 - [ ] CI/CD
+- [ ] Support config file
 
 ## Contributing
 
