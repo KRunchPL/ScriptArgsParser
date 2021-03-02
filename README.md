@@ -27,8 +27,8 @@ Work that still need to be done prior to v1.0
 
 - [x] Default and envs for list
 - [x] Default and envs for tuple
-- [ ] Default and envs for list of tuples
-- [ ] Add more list of tuples tests
+- [x] Default and envs for list of tuples
+- [x] Add more list of tuples tests
 - [ ] Add path type (with tests)
 - [ ] Write some complex test cases
 - [ ] Create from path

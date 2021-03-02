@@ -74,6 +74,14 @@ def test_no_cli_default_multiple_values_tuple(toml_definition_str_int_bool):
     assert parser.arguments_values['tuple'] == ['Some default', 123, True]
 
 
+def test_no_cli_env_single_empty_value(toml_definition_single_str, tuple_env_var):
+    os.environ[tuple_env_var] = ''
+    toml = toml_definition_single_str + f'default_value = "Some default"\nenv_var = "{tuple_env_var}"'
+    cli = []
+    parser = ArgumentsParser(toml, cli)
+    assert parser.arguments_values['tuple'] == ['']
+
+
 def test_no_cli_env_single_value(toml_definition_single_str, tuple_env_var):
     os.environ[tuple_env_var] = '"Some from env"'
     toml = toml_definition_single_str + f'default_value = "Some default"\nenv_var = "{tuple_env_var}"'

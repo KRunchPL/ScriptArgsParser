@@ -116,33 +116,11 @@ class ArgumentsParser:
             if argument_value is None or not isinstance(argument_value, str):
                 continue
             if argument.is_list and not argument.is_tuple:
-                if argument_value == '':
-                    self.arguments_values[argument.name] = ['']
-                    continue
-                argument_value = ' ' + argument_value + ' '
-                while argument_value.find(';;') != -1:
-                    argument_value = argument_value.replace(';;', '; ;', 1)
-                parser = shlex.shlex(argument_value)
-                parser.whitespace_split = True
-                parser.whitespace = ';'
-                self.arguments_values[argument.name] = []
-                for value in parser:
-                    parsed_value = shlex.split(value)
-                    if len(parsed_value) == 0:
-                        self.arguments_values[argument.name].append('')
-                    else:
-                        self.arguments_values[argument.name].append(parsed_value[0])
+                self.arguments_values[argument.name] = self._parse_list(argument, argument_value)
             elif not argument.is_list and argument.is_tuple:
-                self.arguments_values[argument.name] = shlex.split(argument_value)
-                expected_number = len(argument.tuple_types)
-                actual_number = len(self.arguments_values[argument.name])
-                if actual_number != expected_number:
-                    raise RuntimeError(
-                        f'Tuple {argument.name} expected {expected_number} values and got {actual_number}: '
-                        f'{argument_value}.'
-                    )
+                self.arguments_values[argument.name] = self._parse_tuple(argument, argument_value)
             elif argument.is_list and argument.is_tuple:
-                pass
+                self.arguments_values[argument.name] = self._parse_list_of_tuples(argument, argument_value)
 
     def _convert_values(self) -> None:
         for argument in self.arguments:
@@ -166,3 +144,46 @@ class ArgumentsParser:
                 ]
             else:
                 self.arguments_values[argument.name] = self.TYPES_MAPPING[argument.type](argument_value)
+
+    def _parse_tuple(self, argument: Argument, argument_value: str) -> list[Any]:
+        ret_val = shlex.split(argument_value)
+        if len(ret_val) == 0:
+            return ['']
+        expected_number = len(argument.tuple_types)
+        actual_number = len(ret_val)
+        if actual_number != expected_number:
+            raise RuntimeError(
+                f'Tuple {argument.name} expected {expected_number} values and got {actual_number}: '
+                f'{argument_value}.'
+            )
+        return ret_val
+
+    def _split_list(self, argument: Argument, argument_value: str) -> list[Any]:
+        if argument_value == '':
+            return ['']
+        argument_value = ' ' + argument_value + ' '
+        while argument_value.find(';;') != -1:
+            argument_value = argument_value.replace(';;', '; ;', 1)
+        parser = shlex.shlex(argument_value)
+        parser.whitespace_split = True
+        parser.whitespace = ';'
+        return list(parser)
+
+    def _parse_list(self, argument: Argument, argument_value: str) -> list[Any]:
+        ret_val = []
+        for value in self._split_list(argument, argument_value):
+            parsed_value = shlex.split(value)
+            if len(parsed_value) == 0:
+                ret_val.append('')
+            else:
+                ret_val.append(parsed_value[0])
+        return ret_val
+
+    def _parse_list_of_tuples(self, argument: Argument, argument_value: str) -> list[Any]:
+        ret_val = []
+        for value in self._split_list(argument, argument_value):
+            print(f'x{value}x')
+            print(type(value))
+            parsed_value = self._parse_tuple(argument, value)
+            ret_val.append(parsed_value)
+        return ret_val
