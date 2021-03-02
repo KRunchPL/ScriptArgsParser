@@ -112,7 +112,7 @@ class ArgumentsParser:
         user_values = None
         if yaml_config is not None:
             with yaml_config.open('r') as yaml_file:
-                user_values = yaml.load(yaml_file)
+                user_values = yaml.load(yaml_file, Loader=yaml.SafeLoader)
         return cls(arguments, cli_params, user_values)
 
     @staticmethod
