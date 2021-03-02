@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "script_args_parser"
-version = "0.1.0"
+version = "0.2.0"
 description = "Script arguments parsing library."
 authors = ["KRunchPL <krunchfrompoland@gmail.com>"]
 license = "Apache 2.0"
