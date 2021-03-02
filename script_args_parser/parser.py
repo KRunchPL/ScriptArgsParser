@@ -3,6 +3,7 @@ import re
 import shlex
 from argparse import ArgumentParser
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Optional
 
 import toml
@@ -80,6 +81,7 @@ class ArgumentsParser:
         'int': int,
         'bool': str_to_bool,
         'switch': str_to_bool,
+        'path': Path,
     }  #: Maps string values of types to actual converters
 
     def __init__(self, arguments_definitions: str, cli_params: Optional[list[str]] = None) -> None:

@@ -29,10 +29,10 @@ Work that still need to be done prior to v1.0
 - [x] Default and envs for tuple
 - [x] Default and envs for list of tuples
 - [x] Add more list of tuples tests
-- [ ] Add path type (with tests)
-- [ ] Write some complex test cases
+- [x] Add path type (with tests)
 - [ ] Create from path
 - [ ] Support config file
+- [ ] Write some complex test cases
 - [ ] Allow non-cli arguments
 - [ ] Document possible types
 - [ ] Add logging
