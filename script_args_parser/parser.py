@@ -19,10 +19,13 @@ class Argument:
     type: str  #: one of supported types (see README.md)
     description: str  #: user friendly description
     cli_arg: str  #: name of the cli option to set value
+    required: bool = False  #: if set to True and the field is not set in any way, exception should be raised
     env_var: Optional[str] = None  #: name of the env var that will be used as a fallback when cli not set
     default_value: Optional[str] = None  #: default value if nothing else is set
 
     def __post_init__(self):
+        if isinstance(self.required, str):
+            self.required = str_to_bool(self.required)
         self.is_list = False
         self.list_type: Optional[str] = None
         self.is_tuple = False
@@ -62,10 +65,11 @@ def str_to_bool(value: str) -> bool:
     :param value: string to be parsed into bool
     :return: bool value of a given string
     """
-    if value in ['0', 'False']:
-        return False
-    if value in ['1', 'True']:
-        return True
+    if isinstance(value, str):
+        if value.lower() in ['0', 'false', 'no']:
+            return False
+        if value.lower() in ['1', 'true', 'yes']:
+            return True
     return bool(value)
 
 
@@ -95,6 +99,7 @@ class ArgumentsParser:
         self._fallback_values()
         self._calculate_lists_and_tuples()
         self._convert_values()
+        self._validate_required()
 
     def __getattr__(self, name: str) -> Any:
         if name in self.arguments_values:
@@ -218,3 +223,14 @@ class ArgumentsParser:
             parsed_value = self._parse_tuple(argument, value)
             ret_val.append(parsed_value)
         return ret_val
+
+    def _validate_required(self) -> None:
+        for arg in self.arguments:
+            if arg.required and self.arguments_values[arg.name] is None:
+                error_msg = f'No value supplied for argument "{arg.name}". You can set it in config file'
+                if arg.cli_arg is not None:
+                    error_msg += f' or by using cli option: "{arg.cli_arg}"'
+                if arg.env_var is not None:
+                    error_msg += f' or by setting env variable: "{arg.env_var}"'
+                error_msg += '.'
+                raise RuntimeError(error_msg)
