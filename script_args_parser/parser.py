@@ -96,6 +96,11 @@ class ArgumentsParser:
         self._calculate_lists_and_tuples()
         self._convert_values()
 
+    def __getattr__(self, name: str) -> Any:
+        if name in self.arguments_values:
+            return self.arguments_values[name]
+        raise AttributeError(f'No attribute named "{name}"')
+
     @classmethod
     def from_files(
         cls, arguments_file: Union[str, Path], cli_params: Optional[list[str]] = None,
