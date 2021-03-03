@@ -210,8 +210,6 @@ class ArgumentsParser:
     def _parse_list_of_tuples(self, argument: Argument, argument_value: str) -> list[Any]:
         ret_val = []
         for value in self._split_list(argument, argument_value):
-            print(f'x{value}x')
-            print(type(value))
             parsed_value = self._parse_tuple(argument, value)
             ret_val.append(parsed_value)
         return ret_val
