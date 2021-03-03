@@ -1,9 +1,12 @@
 [tool.poetry]
-name = "script_args_parser"
+name = "ScriptArgsParser"
 version = "0.2.0"
 description = "Script arguments parsing library."
 authors = ["KRunchPL <krunchfrompoland@gmail.com>"]
-license = "Apache 2.0"
+license = "Apache-2.0"
+packages = [
+    { include = "script_args_parser" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"
