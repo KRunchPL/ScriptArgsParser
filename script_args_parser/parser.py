@@ -102,9 +102,15 @@ class ArgumentsParser:
         self._validate_required()
 
     def __getattr__(self, name: str) -> Any:
-        if name in self.arguments_values:
+        if name != 'arguments_values' and name in self.arguments_values:
             return self.arguments_values[name]
         raise AttributeError(f'No attribute named "{name}"')
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        if name != 'arguments_values' and name in getattr(self, 'arguments_values', {}):
+            self.arguments_values[name] = value
+        else:
+            super().__setattr__(name, value)
 
     @classmethod
     def from_files(

@@ -27,13 +27,9 @@ def toml_file_path():
         os.unlink(toml_file.name)
 
 
-def test_getattr(toml_file_path):
+def test_setattr(toml_file_path):
     parser = ArgumentsParser.from_files(toml_file_path, ['--cli-option-name', 'value'])
     assert parser.first_arg == 'value'
-
-
-def test_getattr_wrong_attr(toml_file_path):
-    parser = ArgumentsParser.from_files(toml_file_path, ['--cli-option-name', 'value'])
-    with pytest.raises(AttributeError) as exc:
-        parser.not_existing_arg
-    assert 'not_existing_arg' in str(exc)
+    parser.first_arg = 123
+    assert parser.first_arg == 123
+    assert parser.arguments_values['first_arg'] == 123
