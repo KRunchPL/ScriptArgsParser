@@ -127,12 +127,22 @@ class SwitchArgument(Argument):
 
 @dataclass
 class PathArgument(Argument):
+    parent_path: Optional[str] = None  #: name of an argument holding parent path
+
     def convert_value(self, argument_value: Any) -> Path:
         return Path(argument_value)
 
     @staticmethod
     def matcher(arg_type: str) -> bool:
         return arg_type == 'path'
+
+    def post_process(self, argument_value: Any, arguments: dict[str, Any]) -> Any:
+        if self.parent_path is not None:
+            if not isinstance(parent_path_value := arguments.get(self.parent_path), Path):
+                raise ValueError(f'Parent path has to be a Path not {type(parent_path_value)}')
+            return parent_path_value / argument_value
+        else:
+            return argument_value
 
 
 class ListArgument(Argument):

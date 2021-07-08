@@ -22,6 +22,26 @@ def arguments_definition():
     )]
 
 
+@pytest.fixture
+def arguments_definition_with_parent():
+    return [
+        PathArgument(
+            name='p_path',
+            description='Parent path value',
+            type='path',
+            cli_arg='--parent-path',
+            default_value='my_parent',
+        ),
+        PathArgument(
+            name='path',
+            description='Path value',
+            type='path',
+            cli_arg='--file-path',
+            parent_path='p_path',
+        ),
+    ]
+
+
 def test_no_value(arguments_definition):
     cli = []
     parser = ArgumentsParser(arguments_definition, cli)
@@ -75,4 +95,14 @@ def test_no_cli_env_set(arguments_definition_with_env, env_var, env_value, expec
     os.environ[env_var] = env_value
     cli = []
     parser = ArgumentsParser(arguments_definition_with_env, cli)
+    assert parser.arguments_values['path'] == expected_value
+
+
+@pytest.mark.parametrize('cli_value, expected_value', [
+    ('./LICENSE', Path('my_parent/LICENSE')),
+    ('', Path('my_parent')),
+])
+def test_single_value_with_parent(arguments_definition_with_parent, cli_value, expected_value):
+    cli = ['--file-path', cli_value]
+    parser = ArgumentsParser(arguments_definition_with_parent, cli)
     assert parser.arguments_values['path'] == expected_value
