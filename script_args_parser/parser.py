@@ -136,11 +136,29 @@ class PathArgument(Argument):
     def matcher(arg_type: str) -> bool:
         return arg_type == 'path'
 
-    def post_process(self, argument_value: Any, arguments: dict[str, Any]) -> Any:
+    def post_process(self, argument_value: Path, arguments: dict[str, Any]) -> Path:
         if self.parent_path is not None:
             if not isinstance(parent_path_value := arguments.get(self.parent_path), Path):
                 raise ValueError(f'Parent path has to be a Path not {type(parent_path_value)}')
             return parent_path_value / argument_value
+        else:
+            return argument_value
+
+
+@dataclass
+class IntArgument(Argument):
+    post_operations: Optional[str] = None  #: expression to calulate final value; {value} will be substituted
+
+    def convert_value(self, argument_value: Any) -> int:
+        return int(argument_value)
+
+    @staticmethod
+    def matcher(arg_type: str) -> bool:
+        return arg_type == 'int'
+
+    def post_process(self, argument_value: int, arguments: dict[str, Any]) -> int:
+        if self.post_operations is not None:
+            return eval(self.post_operations.format(value=argument_value))
         else:
             return argument_value
 
@@ -293,7 +311,7 @@ class ListOfTuplesArgument(Argument):
 
 
 _BUILT_IN_ARGUMENTS_TYPES = [
-    ListOfTuplesArgument, ListArgument, TupleArgument, SwitchArgument, PathArgument, Argument
+    ListOfTuplesArgument, ListArgument, TupleArgument, SwitchArgument, PathArgument, IntArgument, Argument
 ]
 CUSTOM_ARGUMENTS_TYPES = []
 

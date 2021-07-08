@@ -2,7 +2,7 @@ import os
 import pytest
 
 from script_args_parser import ArgumentsParser
-from script_args_parser.parser import Argument
+from script_args_parser.parser import IntArgument
 from tests.common_fixtures import *  # noqa: F401, F403
 
 
@@ -13,11 +13,22 @@ def env_var_name():
 
 @pytest.fixture
 def arguments_definition():
-    return [Argument(
+    return [IntArgument(
         name='integer',
         description='Integer value',
         type='int',
         cli_arg='--some-integer',
+    )]
+
+
+@pytest.fixture
+def arguments_definition_with_post_operations():
+    return [IntArgument(
+        name='integer',
+        description='Integer value',
+        type='int',
+        cli_arg='--some-integer',
+        post_operations='({value} + 3) * 10',
     )]
 
 
@@ -97,3 +108,9 @@ def test_no_cli_env_set_not_parsable(arguments_definition_with_env, env_var):
     cli = []
     with pytest.raises(ValueError):
         ArgumentsParser(arguments_definition_with_env, cli)
+
+
+def test_single_value_with_post_operations(arguments_definition_with_post_operations):
+    cli = ['--some-integer', '3']
+    parser = ArgumentsParser(arguments_definition_with_post_operations, cli)
+    assert parser.arguments_values['integer'] == 60

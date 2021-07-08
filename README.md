@@ -40,7 +40,7 @@ Above script will read arguments definition from `example-parameters.toml` and t
 3. from environment variables,
 4. default values.
 
-In any argument does not have value defined it will be None, unless it is required, so it will raise an exception.
+If any argument does not have value defined it will be None, unless it is required, so it will raise an exception.
 
 When all values are established, parser will convert them to specified type.
 
@@ -107,6 +107,8 @@ Type field value: `int`
 
 Value will be parsed to integer, if not possible, exception will be raised.
 
+# TODO: Describe post_operations
+
 #### Boolean
 
 Type field value: `bool`
@@ -129,6 +131,8 @@ Behaves in the same way as `bool` but additionaly cli option can be passed witho
 Type field value: `path`
 
 Will be converted into `pathlib.Path` object. Worth noticing is that empty string will be equivalent of current directory.
+
+# TODO: Describe parent_path
 
 #### List
 
