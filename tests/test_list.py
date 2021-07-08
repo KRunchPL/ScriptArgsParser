@@ -2,7 +2,7 @@ import os
 import pytest
 
 from script_args_parser import ArgumentsParser
-from script_args_parser.parser import Argument
+from script_args_parser.parser import ListArgument
 from tests.common_fixtures import *  # noqa: F401, F403
 
 
@@ -13,7 +13,7 @@ def env_var_name():
 
 @pytest.fixture
 def arguments_definition():
-    return [Argument(
+    return [ListArgument(
         name='list',
         description='List value',
         type='list[str]',
@@ -23,7 +23,7 @@ def arguments_definition():
 
 @pytest.fixture
 def arguments_definition_int():
-    return [Argument(
+    return [ListArgument(
         name='list',
         description='List value',
         type='list[int]',

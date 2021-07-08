@@ -3,7 +3,7 @@ import pytest
 from pathlib import Path
 
 from script_args_parser import ArgumentsParser
-from script_args_parser.parser import Argument
+from script_args_parser.parser import PathArgument
 from tests.common_fixtures import *  # noqa: F401, F403
 
 
@@ -14,7 +14,7 @@ def env_var_name():
 
 @pytest.fixture
 def arguments_definition():
-    return [Argument(
+    return [PathArgument(
         name='path',
         description='Path value',
         type='path',

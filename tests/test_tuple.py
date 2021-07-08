@@ -2,7 +2,7 @@ import os
 import pytest
 
 from script_args_parser import ArgumentsParser
-from script_args_parser.parser import Argument
+from script_args_parser.parser import TupleArgument
 from tests.common_fixtures import *  # noqa: F401, F403
 
 
@@ -13,7 +13,7 @@ def env_var_name():
 
 @pytest.fixture
 def arguments_definition_single_str():
-    return [Argument(
+    return [TupleArgument(
         name='tuple',
         description='Tuple value',
         type='tuple[str]',
@@ -23,7 +23,7 @@ def arguments_definition_single_str():
 
 @pytest.fixture
 def arguments_definition_triple_str():
-    return [Argument(
+    return [TupleArgument(
         name='tuple',
         description='Tuple value',
         type='tuple[str, str, str]',
@@ -33,7 +33,7 @@ def arguments_definition_triple_str():
 
 @pytest.fixture
 def arguments_definition_str_int_bool():
-    return [Argument(
+    return [TupleArgument(
         name='tuple',
         description='Tuple value',
         type='tuple[str, int, bool]',
