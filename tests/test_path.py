@@ -3,7 +3,7 @@ import pytest
 from pathlib import Path
 
 from script_args_parser import ArgumentsParser
-from script_args_parser.parser import PathArgument
+from script_args_parser.arguments import PathArgument
 from tests.common_fixtures import *  # noqa: F401, F403
 
 

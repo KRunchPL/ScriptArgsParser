@@ -2,7 +2,7 @@ import os
 import pytest
 
 from script_args_parser import ArgumentsParser
-from script_args_parser.parser import IntArgument
+from script_args_parser.arguments import IntArgument
 from tests.common_fixtures import *  # noqa: F401, F403
 
 

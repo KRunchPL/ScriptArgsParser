@@ -2,7 +2,7 @@ import os
 import pytest
 
 from script_args_parser import ArgumentsParser
-from script_args_parser.parser import ListOfTuplesArgument
+from script_args_parser.arguments import ListOfTuplesArgument
 from tests.common_fixtures import *  # noqa: F401, F403
 
 
