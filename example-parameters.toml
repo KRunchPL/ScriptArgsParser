@@ -7,6 +7,7 @@ cli_arg = "--my-name"
 description = "Your age"
 type = "int"
 cli_arg = "--my-age"
+post_operations = "{value} * 10"
 
 [first_time]
 description = "Whether it is first time you use this app"
@@ -33,7 +34,13 @@ description = "City and years you live there in"
 type = "tuple[str, int]"
 cli_arg = "--location"
 
-[picture]
-description = "Path to file with a picture"
+[pictures_folder]
+description = "Path to folder with pictures"
 type = "path"
-cli_arg = "--picture"
+cli_arg = "--pictures-folder"
+
+[picture_name]
+description = "Name of a picture file"
+type = "path"
+cli_arg = "--picture-name"
+parent_path = "pictures_folder"

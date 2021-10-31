@@ -10,4 +10,5 @@ children:
     - 16
   - - Alan
     - 15
-picture: ./setup.cfg
+pictures_folder: ./images
+picture_name: beautiful.jpg

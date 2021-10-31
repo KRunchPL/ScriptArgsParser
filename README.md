@@ -113,7 +113,11 @@ Type field value: `int`
 
 Value will be parsed to integer, if not possible, exception will be raised.
 
-# TODO: Describe post_operations
+##### Post operations
+
+Additional parameter `post_operations` can be used. It stores the expression that will be evaluated after the value is read. The result of evaluation will be used as a value. The `{value}` token in expression will be substituted with the value provided by the user.
+
+For example when a program requires value in seconds, but the user will always want to specify minutes the `post_operations` can be: `"{value} * 60"`.
 
 #### Boolean
 
@@ -138,7 +142,50 @@ Type field value: `path`
 
 Will be converted into `pathlib.Path` object. Worth noticing is that empty string will be equivalent of current directory.
 
-# TODO: Describe parent_path
+##### Parent path
+
+Additional parameter `parent_path` can be used. It shall contain a name of another path argument. Current path will be prepended with the value of `parent_path`.
+
+With given toml file the default value of `picture_name` will be `'images/beautiful.jpg'`.
+
+```toml
+[pictures_folder]
+description = "Path to folder with pictures"
+type = "path"
+cli_arg = "--pictures-folder"
+default = "./images"
+
+[picture_name]
+description = "Name of a picture file"
+type = "path"
+cli_arg = "--picture-name"
+parent_path = "pictures_folder"
+default = "beautiful.jpg"
+```
+
+It is possible to make a hierarchy of paths, but keep in mind that the arguments are evaluated in order that they are defined in toml file, so with below toml file the `picture_name` will have value `'the_best_user\beautiful.jpg'` even though `user_folder` will be `pictures_folder\user_folder`.
+
+```toml
+[pictures_folder]
+description = "Path to folder with pictures"
+type = "path"
+cli_arg = "--pictures-folder"
+default = "./images"
+
+[picture_name]
+description = "Name of a picture file"
+type = "path"
+cli_arg = "--picture-name"
+parent_path = "user_folder"
+default = "beautiful.jpg"
+
+[user_folder]
+description = "Name of a user folder file"
+type = "path"
+cli_arg = "--user-folder"
+parent_path = "pictures_folder"
+default = "the_best_user"
+```
 
 #### List
 
