@@ -2,6 +2,12 @@
 
 This library is meant to provide an easy way to consume arguments for scripts in more complex scenarios without writing too much code.
 
+[![license](https://img.shields.io/github/license/KRunchPL/script-args-parser.svg)](https://github.com/KRunchPL/script-args-parser/blob/master/LICENSE)
+[![latest release](https://img.shields.io/github/release/KRunchPL/script-args-parser.svg)](https://github.com/KRunchPL/script-args-parser/releases/latest) [![latest release date](https://img.shields.io/github/release-date/KRunchPL/script-args-parser.svg)](https://github.com/KRunchPL/script-args-parser/releases)
+
+[![PyPI version](https://img.shields.io/pypi/v/script-args-parser)](https://pypi.org/project/script-args-parser/) [![Python](https://img.shields.io/pypi/pyversions/script-args-parser)](https://pypi.org/project/script-args-parser/)
+
+
 ## Why something more?
 
 In Python there are a lot of ways to consume cli parameters, starting from built-in parsers finishing at libraries like docopt. But unfortunately during my adventure I encountered a few problems that were not solvable just by using one of them. Few of those problems:
