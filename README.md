@@ -243,6 +243,58 @@ Above examples for `list[tuple[str, int]]` will produce:
 [['John', 16], ['David', 18], ['Maria', 21]]
 ```
 
+#### Dataclass argument
+
+Type field value: `<name of the dataclass>`
+
+Parses a list or a dict to user defined dataclass.
+
+In order for the dataclass to be used it has to be decorated with `script_args_parser.decorators.dataclass_argument`.
+
+With given Python code and toml definition:
+
+```python
+@dataclass_argument
+@dataclass
+class MyDataClass:
+    value_1: str
+    value_2: str
+```
+
+```toml
+[two_values]
+description = "Some two string values"
+type = "MyDataClass"
+cli_arg = "--two-values"
+```
+
+The following yaml input files can be used
+
+```yaml
+two_values:
+  - first_value
+  - second value
+```
+
+or
+
+```yaml
+two_values:
+  value_1: first_value
+  value_2: second value
+```
+
+The type can also be used as a list type argument like:
+
+```toml
+[two_values]
+description = "Some two string values"
+type = "list[MyDataClass]"
+cli_arg = "--two-values"
+```
+
+NOTE: Currently cli or env values are not supported for this type.
+
 ## Planned work
 
 Work that still need to be done prior to v1.0
@@ -255,6 +307,7 @@ Work that still need to be done prior to v1.0
 - [x] Create from path
 - [x] Support config file
 - [x] Document possible types
+- [ ] Add support for env and cli values for dataclass type
 - [ ] Write some complex test cases
 - [ ] Allow non-cli arguments
 - [ ] Add logging
