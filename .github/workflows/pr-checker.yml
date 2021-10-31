@@ -7,6 +7,7 @@ jobs:
     name: Run linter and unit tests
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
         poetry-version: ["1.1.11"]
