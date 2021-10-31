@@ -12,3 +12,6 @@ children:
     - 15
 pictures_folder: ./images
 picture_name: beautiful.jpg
+two_values:
+  value_2: second value
+  value_1: first_value

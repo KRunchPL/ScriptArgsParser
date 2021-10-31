@@ -44,3 +44,8 @@ description = "Name of a picture file"
 type = "path"
 cli_arg = "--picture-name"
 parent_path = "pictures_folder"
+
+[two_values]
+description = "Some two string values"
+type = "MyDataClass"
+cli_arg = "--two-values"

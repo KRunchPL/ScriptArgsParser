@@ -94,7 +94,12 @@ class Argument:
 
     @staticmethod
     def matcher(arg_type: str) -> bool:
-        return arg_type in _BASIC_TYPES_MAPPING or arg_type in CUSTOM_TYPES_MAPPING
+        lower_arg_type = arg_type.lower()
+        return (
+            arg_type in chain(_BASIC_TYPES_MAPPING, CUSTOM_TYPES_MAPPING)
+            or
+            lower_arg_type in chain(_BASIC_TYPES_MAPPING, CUSTOM_TYPES_MAPPING)
+        )
 
 
 @dataclass
@@ -118,7 +123,7 @@ class SwitchArgument(Argument):
 
     @staticmethod
     def matcher(arg_type: str) -> bool:
-        return arg_type == 'switch'
+        return arg_type.lower() == 'switch'
 
 
 @dataclass
@@ -130,7 +135,7 @@ class PathArgument(Argument):
 
     @staticmethod
     def matcher(arg_type: str) -> bool:
-        return arg_type == 'path'
+        return arg_type.lower() == 'path'
 
     def post_process(self, argument_value: Path, arguments: dict[str, Any]) -> Path:
         if self.parent_path is not None:
@@ -150,7 +155,7 @@ class IntArgument(Argument):
 
     @staticmethod
     def matcher(arg_type: str) -> bool:
-        return arg_type == 'int'
+        return arg_type.lower() == 'int'
 
     def post_process(self, argument_value: int, arguments: dict[str, Any]) -> int:
         if self.post_operations is not None:
@@ -204,7 +209,7 @@ class ListArgument(Argument):
 
     @staticmethod
     def matcher(arg_type: str) -> bool:
-        return arg_type.startswith('list[')
+        return arg_type.lower().startswith('list[')
 
 
 class TupleArgument(Argument):
@@ -256,7 +261,7 @@ class TupleArgument(Argument):
 
     @staticmethod
     def matcher(arg_type: str) -> bool:
-        return arg_type.startswith('tuple[')
+        return arg_type.lower().startswith('tuple[')
 
 
 class ListOfTuplesArgument(Argument):
@@ -303,7 +308,7 @@ class ListOfTuplesArgument(Argument):
 
     @staticmethod
     def matcher(arg_type: str) -> bool:
-        return arg_type.startswith('list[tuple[')
+        return arg_type.lower().startswith('list[tuple[')
 
 
 _BUILT_IN_ARGUMENTS_TYPES = [
@@ -313,8 +318,7 @@ CUSTOM_ARGUMENTS_TYPES = []
 
 
 def argument_factory(name: str, definition: dict) -> Argument:
-    lower_type = definition['type'].lower()
     for argument_class in chain(CUSTOM_ARGUMENTS_TYPES, _BUILT_IN_ARGUMENTS_TYPES):
-        if argument_class.matcher(lower_type):
+        if argument_class.matcher(definition['type']):
             return argument_class(name=name, **definition)
     raise ValueError(f'Unknown argument type: {definition["type"]}')
