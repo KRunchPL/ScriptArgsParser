@@ -1,4 +1,5 @@
 import os
+
 import pytest
 
 from script_args_parser import ArgumentsParser

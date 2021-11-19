@@ -3,8 +3,8 @@ from dataclasses import dataclass
 import pytest
 
 from script_args_parser.arguments import ListArgument
-from script_args_parser.parser import Argument, ArgumentsParser
 from script_args_parser.decorators import dataclass_argument
+from script_args_parser.parser import Argument, ArgumentsParser
 
 
 @dataclass_argument

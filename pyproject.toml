@@ -23,7 +23,23 @@ flake8-html = "^0.4.1"
 flake8-todo = "^0.7"
 pytest = "^6.2.2"
 pytest-cov = "^2.11.1"
+flake8-isort = "^4.1.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+virtual_env = ".venv"
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+lines_between_types = 0
+lines_between_sections = 1
+lines_after_imports = 2
+lines_before_imports = 0
+include_trailing_comma = true
+use_parentheses = true
+multi_line_output = 3
+line_length = 110
+force_grid_wrap = 0
+combine_as_imports = true
+ensure_newline_before_comments = true

@@ -1,6 +1,7 @@
 import os
-import pytest
 from pathlib import Path
+
+import pytest
 
 from script_args_parser import ArgumentsParser
 from script_args_parser.arguments import PathArgument
