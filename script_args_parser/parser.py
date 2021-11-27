@@ -56,7 +56,7 @@ class ArgumentsParser:
         :param name: the name of argument to be overwritten
         :param value: the value to be set for the argument
         """
-        if name != 'arguments_values' and name in getattr(self, 'arguments_values', {}):
+        if name != 'arguments_values' and name in getattr(self, 'arguments_values', ''):
             self.arguments_values[name] = value
         else:
             super().__setattr__(name, value)
@@ -90,7 +90,7 @@ class ArgumentsParser:
         parsed_toml = toml.loads(toml_string)
         return [argument_factory(arg_name, arg_def) for arg_name, arg_def in parsed_toml.items()]
 
-    def _read_cli_arguments(self, cli_params: list[str] = None) -> dict[str, Any]:
+    def _read_cli_arguments(self, cli_params: Optional[list[str]] = None) -> dict[str, Any]:
         cli_parser = ArgumentParser()
         for argument in self.arguments:
             args, kwargs = argument.argparse_options

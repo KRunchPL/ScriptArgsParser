@@ -7,7 +7,7 @@ from copy import deepcopy
 from dataclasses import asdict, dataclass
 from itertools import chain
 from pathlib import Path
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional, Type, Union
 
 
 def _split_string_by_semicolon(argument_value: str) -> list[Any]:
@@ -39,7 +39,7 @@ def _str_to_bool(value: str) -> bool:
     return bool(value)
 
 
-_BASIC_TYPES_MAPPING: dict[str, Callable] = {
+_BASIC_TYPES_MAPPING: dict[str, Callable[[Any], Any]] = {
     'str': str,
     'int': int,
     'bool': _str_to_bool,
@@ -47,7 +47,7 @@ _BASIC_TYPES_MAPPING: dict[str, Callable] = {
 }  #: Built-in map: string value -> types to actual converter
 
 
-CUSTOM_TYPES_MAPPING: dict[str, Callable] = {
+CUSTOM_TYPES_MAPPING: dict[str, Callable[[Any], Any]] = {
 }  #: Maps string values of types to actual converters
 
 
@@ -65,12 +65,12 @@ class Argument:
     env_var: Optional[str] = None  #: name of the env var that will be used as a fallback when cli not set
     default_value: Optional[str] = None  #: default value if nothing else is set
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Perform post init argument processing.
         """
-        if isinstance(self.required, str):
-            self.required = _str_to_bool(self.required)
+        if isinstance(self.required, str):  # type: ignore
+            self.required = _str_to_bool(self.required)  # type: ignore
 
     def parse_value(self, argument_value: Any) -> Any:
         """
@@ -101,14 +101,14 @@ class Argument:
         return argument_value
 
     @property
-    def argparse_options(self) -> dict:
+    def argparse_options(self) -> tuple[list[str], dict[str, Any]]:
         """
         Generate options to parse argument.
 
         :return: args and kwargs that can be used in argparse.ArgumentParser.add_argument
         """
         args = [self.cli_arg]
-        kwargs = {'dest': self.name}
+        kwargs: dict[str, Any] = {'dest': self.name}
         if self.type == 'switch':
             kwargs['action'] = 'store'
             kwargs['nargs'] = '?'
@@ -116,7 +116,7 @@ class Argument:
         return (args, kwargs)
 
     @property
-    def types_mapping(self) -> dict[str, Callable]:
+    def types_mapping(self) -> dict[str, Callable[[Any], Any]]:
         """
         Generate single mapping for all avaliable types.
 
@@ -149,7 +149,7 @@ class SwitchArgument(Argument):
     """
 
     @property
-    def argparse_options(self) -> dict:
+    def argparse_options(self) -> tuple[list[str], dict[str, Any]]:
         """
         Generate options to parse argument.
 
@@ -265,7 +265,7 @@ class IntArgument(Argument):
         :return: new argument value
         """
         if self.post_operations is not None:
-            return eval(self.post_operations.format(value=argument_value))
+            return int(eval(self.post_operations.format(value=argument_value)))
         else:
             return argument_value
 
@@ -277,7 +277,7 @@ class ListArgument(Argument):
 
     _TYPE_REGEX = re.compile(r'list\[(.+)\]')
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Perform post init argument processing.
 
@@ -289,7 +289,7 @@ class ListArgument(Argument):
             raise ValueError(f'List type has to match regexp {self._TYPE_REGEX.pattern}. Found {self.type}.')
         self.items_type = match[1]
 
-    def parse_value(self, argument_value: Union[str, list]) -> list[Any]:
+    def parse_value(self, argument_value: Union[str, list[str]]) -> list[Any]:
         """
         Parse the value into list of values.
 
@@ -304,7 +304,7 @@ class ListArgument(Argument):
             raise TypeError(
                 f'Value for list type has to be either list or string. Found {type(argument_value)}.'
             )
-        ret_val = []
+        ret_val: list[str] = []
         for value in _split_string_by_semicolon(argument_value):
             parsed_value = shlex.split(value)
             if len(parsed_value) == 0:
@@ -325,7 +325,7 @@ class ListArgument(Argument):
         ]
 
     @property
-    def argparse_options(self) -> dict:
+    def argparse_options(self) -> tuple[list[str], dict[str, Any]]:
         """
         Generate options to parse argument.
 
@@ -356,7 +356,7 @@ class TupleArgument(Argument):
 
     _TYPE_REGEX = re.compile(r'tuple\[(.+)\]')
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Perform post init argument processing.
 
@@ -368,7 +368,7 @@ class TupleArgument(Argument):
             raise ValueError(f'Tuple type has to match regexp {self._TYPE_REGEX.pattern}. Found {self.type}.')
         self.items_types = [x.strip() for x in match[1].split(',')]
 
-    def parse_value(self, argument_value: Union[str, list]) -> list[Any]:
+    def parse_value(self, argument_value: Union[str, list[str]]) -> list[Any]:
         """
         Parse the value into list of values.
 
@@ -409,7 +409,7 @@ class TupleArgument(Argument):
         ]
 
     @property
-    def argparse_options(self) -> dict:
+    def argparse_options(self) -> tuple[list[str], dict[str, Any]]:
         """
         Generate options to parse argument.
 
@@ -440,7 +440,7 @@ class ListOfTuplesArgument(Argument):
 
     _TYPE_REGEX = re.compile(r'list\[(tuple\[(.+)\])\]')
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """
         Perform post init argument processing.
 
@@ -456,7 +456,7 @@ class ListOfTuplesArgument(Argument):
         definition['type'] = match[1]
         self.tuple_argument = TupleArgument(**definition)
 
-    def parse_value(self, argument_value: Union[str, list]) -> list[list[Any]]:
+    def parse_value(self, argument_value: Union[str, Union[list[list[Any]], str]]) -> list[list[Any]]:
         """
         Parse the value into list of list of values.
 
@@ -471,7 +471,7 @@ class ListOfTuplesArgument(Argument):
             raise TypeError(
                 f'Value for list of tuples has to be either list or string. Found {type(argument_value)}.'
             )
-        ret_val = []
+        ret_val: list[list[Any]] = []
         for value in _split_string_by_semicolon(argument_value):
             ret_val.append(self.tuple_argument.parse_value(value))
         return ret_val
@@ -486,7 +486,7 @@ class ListOfTuplesArgument(Argument):
         return [self.tuple_argument.convert_value(item_value) for item_value in argument_value]
 
     @property
-    def argparse_options(self) -> dict:
+    def argparse_options(self) -> tuple[list[str], dict[str, Any]]:
         """
         Generate options to parse argument.
 
@@ -511,13 +511,13 @@ class ListOfTuplesArgument(Argument):
         return arg_type.lower().startswith('list[tuple[')
 
 
-_BUILT_IN_ARGUMENTS_TYPES = [
+_BUILT_IN_ARGUMENTS_TYPES: list[Type[Argument]] = [
     ListOfTuplesArgument, ListArgument, TupleArgument, SwitchArgument, PathArgument, IntArgument, Argument
 ]
-CUSTOM_ARGUMENTS_TYPES = []
+CUSTOM_ARGUMENTS_TYPES: list[Type[Argument]] = []
 
 
-def argument_factory(name: str, definition: dict) -> Argument:
+def argument_factory(name: str, definition: dict[str, Any]) -> Argument:
     """
     Create argument based on definition.
 

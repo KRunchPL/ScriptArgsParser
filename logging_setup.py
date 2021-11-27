@@ -4,7 +4,7 @@ Logging configuration used in example.
 from logging.config import dictConfig
 
 
-def setup_logging():
+def setup_logging() -> None:
     """
     Set up logging, so library emited logs are shown on console.
     """

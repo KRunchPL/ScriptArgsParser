@@ -6,7 +6,7 @@ from typing import Any, Type, Union
 from script_args_parser.arguments import CUSTOM_TYPES_MAPPING
 
 
-def dataclass_argument(decorated: Type) -> Type:
+def dataclass_argument(decorated: Type[Any]) -> Type[Any]:
     """
     Register decorated dataclass as supported argument type.
 
@@ -14,11 +14,10 @@ def dataclass_argument(decorated: Type) -> Type:
 
     :return: decorated class, but a little bit modified
     """
-    def argument_factory(definition: Union[dict, list]) -> Any:
+    def argument_factory(definition: Union[dict[str, Any], list[Any]]) -> Any:
         if isinstance(definition, dict):
             return decorated(**definition)
         if isinstance(definition, list):
             return decorated(*definition)
-    decorated.__argument_factory = argument_factory
-    CUSTOM_TYPES_MAPPING[decorated.__name__] = decorated.__argument_factory
+    CUSTOM_TYPES_MAPPING[decorated.__name__] = argument_factory
     return decorated

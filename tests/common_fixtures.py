@@ -2,6 +2,7 @@
 Provides fixtures common for different test modules.
 """
 import os
+from collections.abc import Generator
 
 import pytest
 
@@ -24,7 +25,7 @@ def arguments_definition_with_env(arguments_definition: list[Argument], env_var_
 
 
 @pytest.fixture
-def env_var(env_var_name: str) -> str:
+def env_var(env_var_name: str) -> Generator[str, None, None]:
     """
     Modify environment by adding a variable with provided name.
 
