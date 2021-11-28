@@ -1,3 +1,6 @@
+"""
+Defines arguments' types.
+"""
 import re
 import shlex
 from copy import deepcopy
@@ -21,7 +24,8 @@ def _split_string_by_semicolon(argument_value: str) -> list[Any]:
 
 def _str_to_bool(value: str) -> bool:
     """
-    Parses string into bool. It tries to match some predefined values.
+    Parse string into bool. It tries to match some predefined values.
+
     If none is matches, python bool(value) is used.
 
     :param value: string to be parsed into bool
@@ -50,8 +54,9 @@ CUSTOM_TYPES_MAPPING: dict[str, Callable] = {
 @dataclass
 class Argument:
     """
-    Stores information about single script arguments
+    Stores information about single script argument.
     """
+
     name: str  #: custom name that the value will be stored at
     type: str  #: one of supported types (see README.md)
     description: str  #: user friendly description
@@ -61,21 +66,45 @@ class Argument:
     default_value: Optional[str] = None  #: default value if nothing else is set
 
     def __post_init__(self):
+        """
+        Perform post init argument processing.
+        """
         if isinstance(self.required, str):
             self.required = _str_to_bool(self.required)
 
     def parse_value(self, argument_value: Any) -> Any:
+        """
+        Argument is simple type, no need to parse anything, so it just returns the value as it was.
+
+        :param argument_value: found argument value
+        :return: parsed argument value
+        """
         return argument_value
 
     def convert_value(self, argument_value: Any) -> Any:
+        """
+        Cast argument value into proper type.
+
+        :param argument_value: parsed argument value
+        :return: casted argument value
+        """
         return self.types_mapping[self.type](argument_value)
 
     def post_process(self, argument_value: Any, arguments: dict[str, Any]) -> Any:
+        """
+        Argument is simple type, there is no built-in post processing for it.
+
+        :param argument_value: argument value
+        :param arguments: values of all parsed arguments
+        :return: new argument value
+        """
         return argument_value
 
     @property
     def argparse_options(self) -> dict:
         """
+        Generate options to parse argument.
+
         :return: args and kwargs that can be used in argparse.ArgumentParser.add_argument
         """
         args = [self.cli_arg]
@@ -88,12 +117,23 @@ class Argument:
 
     @property
     def types_mapping(self) -> dict[str, Callable]:
+        """
+        Generate single mapping for all avaliable types.
+
+        :return: available types mapping
+        """
         ret_val = deepcopy(_BASIC_TYPES_MAPPING)
         ret_val.update(CUSTOM_TYPES_MAPPING)
         return ret_val
 
     @staticmethod
     def matcher(arg_type: str) -> bool:
+        """
+        Check whether given type is supported by Argument class.
+
+        :param arg_type: argument type string
+        :return: whether provided type is supported
+        """
         lower_arg_type = arg_type.lower()
         return (
             arg_type in chain(_BASIC_TYPES_MAPPING, CUSTOM_TYPES_MAPPING)
@@ -104,9 +144,15 @@ class Argument:
 
 @dataclass
 class SwitchArgument(Argument):
+    """
+    Represents switch (bool) arguments.
+    """
+
     @property
     def argparse_options(self) -> dict:
         """
+        Generate options to parse argument.
+
         :return: args and kwargs that can be used in argparse.ArgumentParser.add_argument
         """
         args = [self.cli_arg]
@@ -119,25 +165,62 @@ class SwitchArgument(Argument):
         return (args, kwargs)
 
     def convert_value(self, argument_value: Any) -> bool:
+        """
+        Cast argument value into proper type.
+
+        :param argument_value: parsed argument value
+        :return: casted argument value
+        """
         return _str_to_bool(argument_value)
 
     @staticmethod
     def matcher(arg_type: str) -> bool:
+        """
+        Check whether given type string describes a switch.
+
+        :param arg_type: argument type string
+        :return: whether provided type is a switch
+        """
         return arg_type.lower() == 'switch'
 
 
 @dataclass
 class PathArgument(Argument):
+    """
+    Represents path arguments.
+    """
+
     parent_path: Optional[str] = None  #: name of an argument holding parent path
 
     def convert_value(self, argument_value: Any) -> Path:
+        """
+        Cast argument value into proper type.
+
+        :param argument_value: parsed argument value
+        :return: casted argument value
+        """
         return Path(argument_value)
 
     @staticmethod
     def matcher(arg_type: str) -> bool:
+        """
+        Check whether given type string describes a path.
+
+        :param arg_type: argument type string
+        :return: whether provided type is a path
+        """
         return arg_type.lower() == 'path'
 
     def post_process(self, argument_value: Path, arguments: dict[str, Any]) -> Path:
+        """
+        Prepend the path with parent path if required.
+
+        :param argument_value: argument value
+        :param arguments: values of all parsed arguments
+        :return: new argument value
+
+        :raises ValueError: if parent path is not a path
+        """
         if self.parent_path is not None:
             if not isinstance(parent_path_value := arguments.get(self.parent_path), Path):
                 raise ValueError(f'Parent path has to be a Path not {type(parent_path_value)}')
@@ -148,16 +231,39 @@ class PathArgument(Argument):
 
 @dataclass
 class IntArgument(Argument):
+    """
+    Represents integer argument.
+    """
+
     post_operations: Optional[str] = None  #: expression to calulate final value; {value} will be substituted
 
     def convert_value(self, argument_value: Any) -> int:
+        """
+        Cast argument value into proper type.
+
+        :param argument_value: parsed argument value
+        :return: casted argument value
+        """
         return int(argument_value)
 
     @staticmethod
     def matcher(arg_type: str) -> bool:
+        """
+        Check whether given type string describes an integer.
+
+        :param arg_type: argument type string
+        :return: whether provided type is an integer
+        """
         return arg_type.lower() == 'int'
 
     def post_process(self, argument_value: int, arguments: dict[str, Any]) -> int:
+        """
+        Evaluate the post operations to establish new argument value.
+
+        :param argument_value: argument value
+        :param arguments: values of all parsed arguments
+        :return: new argument value
+        """
         if self.post_operations is not None:
             return eval(self.post_operations.format(value=argument_value))
         else:
@@ -165,9 +271,18 @@ class IntArgument(Argument):
 
 
 class ListArgument(Argument):
+    """
+    Represents argument that is a list of values of the same type.
+    """
+
     _TYPE_REGEX = re.compile(r'list\[(.+)\]')
 
     def __post_init__(self):
+        """
+        Perform post init argument processing.
+
+        :raises ValueError: if the argument type does not match list type regex
+        """
         super().__post_init__()
         match = self._TYPE_REGEX.match(self.type)
         if match is None:
@@ -175,6 +290,14 @@ class ListArgument(Argument):
         self.items_type = match[1]
 
     def parse_value(self, argument_value: Union[str, list]) -> list[Any]:
+        """
+        Parse the value into list of values.
+
+        :param argument_value: read value of the argument
+        :return: parsed value of argument
+
+        :raises TypeError: the input value is of not supported type
+        """
         if isinstance(argument_value, list):
             return argument_value
         elif not isinstance(argument_value, str):
@@ -191,6 +314,12 @@ class ListArgument(Argument):
         return ret_val
 
     def convert_value(self, argument_value: list[Any]) -> list[Any]:
+        """
+        Cast argument list values into proper type.
+
+        :param argument_value: parsed argument value
+        :return: casted argument value
+        """
         return [
             self.types_mapping[self.items_type](x) for x in argument_value
         ]
@@ -198,6 +327,8 @@ class ListArgument(Argument):
     @property
     def argparse_options(self) -> dict:
         """
+        Generate options to parse argument.
+
         :return: args and kwargs that can be used in argparse.ArgumentParser.add_argument
         """
         args = [self.cli_arg]
@@ -209,13 +340,28 @@ class ListArgument(Argument):
 
     @staticmethod
     def matcher(arg_type: str) -> bool:
+        """
+        Check whether given type string describes a list.
+
+        :param arg_type: argument type string
+        :return: whether provided type is a list
+        """
         return arg_type.lower().startswith('list[')
 
 
 class TupleArgument(Argument):
+    """
+    Represents argument that is a tuple of values.
+    """
+
     _TYPE_REGEX = re.compile(r'tuple\[(.+)\]')
 
     def __post_init__(self):
+        """
+        Perform post init argument processing.
+
+        :raises ValueError: if the argument type does not match tuple type regex
+        """
         super().__post_init__()
         match = self._TYPE_REGEX.match(self.type)
         if match is None:
@@ -223,6 +369,15 @@ class TupleArgument(Argument):
         self.items_types = [x.strip() for x in match[1].split(',')]
 
     def parse_value(self, argument_value: Union[str, list]) -> list[Any]:
+        """
+        Parse the value into list of values.
+
+        :param argument_value: read value of the argument
+        :return: parsed value of argument
+
+        :raises TypeError: input value is of not supported type
+        :raises RuntimeError: number of tuple items is dfifferent than declared
+        """
         if isinstance(argument_value, list):
             return argument_value
         elif not isinstance(argument_value, str):
@@ -242,6 +397,12 @@ class TupleArgument(Argument):
         return ret_val
 
     def convert_value(self, argument_value: list[Any]) -> list[Any]:
+        """
+        Cast tuple items into proper types.
+
+        :param argument_value: parsed argument value
+        :return: casted argument value
+        """
         converters = [self.types_mapping[x] for x in self.items_types]
         return [
             conv(value) for conv, value in zip(converters, argument_value)
@@ -250,6 +411,8 @@ class TupleArgument(Argument):
     @property
     def argparse_options(self) -> dict:
         """
+        Generate options to parse argument.
+
         :return: args and kwargs that can be used in argparse.ArgumentParser.add_argument
         """
         args = [self.cli_arg]
@@ -261,13 +424,28 @@ class TupleArgument(Argument):
 
     @staticmethod
     def matcher(arg_type: str) -> bool:
+        """
+        Check whether given type string describes a tuple.
+
+        :param arg_type: argument type string
+        :return: whether provided type is a tuple
+        """
         return arg_type.lower().startswith('tuple[')
 
 
 class ListOfTuplesArgument(Argument):
+    """
+    Represents argument that is a list of tuples.
+    """
+
     _TYPE_REGEX = re.compile(r'list\[(tuple\[(.+)\])\]')
 
     def __post_init__(self):
+        """
+        Perform post init argument processing.
+
+        :raises ValueError: if the argument type does not match list of tuples type regex
+        """
         super().__post_init__()
         match = self._TYPE_REGEX.match(self.type)
         if match is None:
@@ -279,6 +457,14 @@ class ListOfTuplesArgument(Argument):
         self.tuple_argument = TupleArgument(**definition)
 
     def parse_value(self, argument_value: Union[str, list]) -> list[list[Any]]:
+        """
+        Parse the value into list of list of values.
+
+        :param argument_value: read value of the argument
+        :return: parsed value of argument
+
+        :raises TypeError: input value is of not supported type
+        """
         if isinstance(argument_value, list):
             return argument_value
         elif not isinstance(argument_value, str):
@@ -291,11 +477,19 @@ class ListOfTuplesArgument(Argument):
         return ret_val
 
     def convert_value(self, argument_value: list[list[Any]]) -> list[list[Any]]:
+        """
+        Cast tuples' items into proper types.
+
+        :param argument_value: parsed argument value
+        :return: casted argument value
+        """
         return [self.tuple_argument.convert_value(item_value) for item_value in argument_value]
 
     @property
     def argparse_options(self) -> dict:
         """
+        Generate options to parse argument.
+
         :return: args and kwargs that can be used in argparse.ArgumentParser.add_argument
         """
         args = [self.cli_arg]
@@ -308,6 +502,12 @@ class ListOfTuplesArgument(Argument):
 
     @staticmethod
     def matcher(arg_type: str) -> bool:
+        """
+        Check whether given type string describes a list of tuples.
+
+        :param arg_type: argument type string
+        :return: whether provided type is a list of tuples
+        """
         return arg_type.lower().startswith('list[tuple[')
 
 
@@ -318,6 +518,15 @@ CUSTOM_ARGUMENTS_TYPES = []
 
 
 def argument_factory(name: str, definition: dict) -> Argument:
+    """
+    Create argument based on definition.
+
+    :raises ValueError: when the type does not match any known handler
+
+    :param name: name of created argument
+    :param definition: definition of created argument
+    :return: created argument
+    """
     for argument_class in chain(CUSTOM_ARGUMENTS_TYPES, _BUILT_IN_ARGUMENTS_TYPES):
         if argument_class.matcher(definition['type']):
             return argument_class(name=name, **definition)

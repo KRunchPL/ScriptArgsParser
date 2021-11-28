@@ -1,3 +1,6 @@
+"""
+Defines parser class.
+"""
 import os
 from argparse import ArgumentParser
 from pathlib import Path
@@ -12,11 +15,14 @@ from script_args_parser.arguments import Argument, argument_factory
 class ArgumentsParser:
     """
     Parses arguments according to given toml definition and cli parameters.
+
     Values for arguments are stored in arguments_values dictionary.
 
     :param arguments_definitions: toml string containing arguments definition
     :param cli_params: list of cli parameters, if not given sys.arg[1:] is used
+    :param user_values: dict with values provided by the user (e.g. as yaml file)
     """
+
     def __init__(
         self, arguments: list[Argument], cli_params: Optional[list[str]] = None,
         user_values: Optional[dict[str, Any]] = None
@@ -31,11 +37,25 @@ class ArgumentsParser:
         self._post_process()
 
     def __getattr__(self, name: str) -> Any:
+        """
+        Return a value of argument with given name.
+
+        :param name: the name of argument to be found
+        :return: the value of found argument
+
+        :raises AttributeError: when argument with given name is not found
+        """
         if name != 'arguments_values' and name in self.arguments_values:
             return self.arguments_values[name]
         raise AttributeError(f'No attribute named "{name}"')
 
     def __setattr__(self, name: str, value: Any) -> None:
+        """
+        Overwrite the value for argument.
+
+        :param name: the name of argument to be overwritten
+        :param value: the value to be set for the argument
+        """
         if name != 'arguments_values' and name in getattr(self, 'arguments_values', {}):
             self.arguments_values[name] = value
         else:
@@ -46,6 +66,14 @@ class ArgumentsParser:
         cls, arguments_file: Union[str, Path], cli_params: Optional[list[str]] = None,
         yaml_config: Optional[Union[str, Path]] = None
     ) -> 'ArgumentsParser':
+        """
+        Create ArgumentsParser based on provided files.
+
+        :param arguments_file: file with arguments definition
+        :param cli_params: list of cli parameters, if not given sys.arg[1:] is used
+        :param yaml_config: file with values provided by user
+        :return: created parser
+        """
         if isinstance(arguments_file, str):
             arguments_file = Path(arguments_file)
         if isinstance(yaml_config, str):

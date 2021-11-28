@@ -1,9 +1,19 @@
+"""
+Decorators that helps defining argument types.
+"""
 from typing import Any, Type, Union
 
 from script_args_parser.arguments import CUSTOM_TYPES_MAPPING
 
 
 def dataclass_argument(decorated: Type) -> Type:
+    """
+    Register decorated dataclass as supported argument type.
+
+    :param decorated: dataclass to be registered
+
+    :return: decorated class, but a little bit modified
+    """
     def argument_factory(definition: Union[dict, list]) -> Any:
         if isinstance(definition, dict):
             return decorated(**definition)

@@ -1,3 +1,7 @@
+"""
+Usage example.
+"""
+
 from dataclasses import dataclass
 
 from script_args_parser import ArgumentsParser, dataclass_argument
@@ -6,6 +10,10 @@ from script_args_parser import ArgumentsParser, dataclass_argument
 @dataclass_argument
 @dataclass
 class MyDataClass:
+    """
+    Example dataclass used as argument.
+    """
+
     value_1: str
     value_2: str
 
