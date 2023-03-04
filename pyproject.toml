@@ -15,20 +15,20 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.9"
 toml = "^0.10.2"
-PyYAML = "^5.4.1"
+PyYAML = "^6.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 darglint = "^1.8.1"
-flake8 = "^3.8.4"
-flake8-html = "^0.4.1"
-flake8-isort = "^4.1.1"
-flake8-pydocstyle = "^0.2.0"
+flake8 = "^6.0.0"
+flake8-html = "^0.4.3"
+flake8-isort = "^6.0.0"
+flake8-pydocstyle = "^0.2.2"
 flake8-todo = "^0.7"
-pytest = "^6.2.2"
-pytest-cov = "^2.11.1"
-mypy = "^0.910"
-types-toml = "^0.10.1"
-types-PyYAML = "^6.0.1"
+mypy = "^1.0.1"
+pytest = "^7.2.2"
+pytest-cov = "^4.0.0"
+types-toml = "^0.10.8.5"
+types-PyYAML = "^6.0.12.8"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -36,9 +36,18 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 testpaths = [
-    "tests"
+    "tests",
 ]
-addopts = "--cov script_args_parser --cov-report html:coverage-report"
+addopts = """
+--cov script_args_parser \
+--cov-config=setup.cfg \
+--cov-report html:coverage-report \
+--cov-report term:skip-covered \
+--cov-fail-under=95 \
+--no-cov-on-fail \
+-Werror -Wignore::ImportWarning \
+--strict-markers \
+"""
 
 [tool.isort]
 virtual_env = ".venv"
@@ -52,24 +61,13 @@ use_parentheses = true
 multi_line_output = 3
 line_length = 110
 force_grid_wrap = 0
-combine_as_imports = true
 ensure_newline_before_comments = true
-
-[tool.pydocstyle]
-### Ignoring explanation
-# D104 - Missing docstring in public package
-# D107 - Missing docstring in __init__
-# D200 - One-line docstring should fit on one line with quotes
-# D203 - 1 blank line required before class docstring
-# D212 - Multi-line docstring summary should start at the first line
-ignore = """
-D104,D107,
-D200,D203,D212
-"""
+combine_as_imports = true
+order_by_type = false
 
 [tool.mypy]
 files = "."
-exclude = "(^|/)tests/"
+show_error_codes = true
 # Strict options
 strict = true
 warn_unused_configs = true
@@ -82,7 +80,7 @@ check_untyped_defs = true
 disallow_untyped_decorators = true
 no_implicit_optional = true
 warn_redundant_casts = true
-warn_unused_ignores = true
+warn_unused_ignores = false  # overridden from strict, because https://github.com/python/mypy/issues/8823
 warn_return_any = true
 no_implicit_reexport = true
 strict_equality = true
@@ -90,3 +88,30 @@ strict_equality = true
 disallow_untyped_globals = true
 warn_no_return = true
 warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = [
+    "tests.*",
+]
+strict_optional = false
+allow_untyped_defs = true
+allow_incomplete_defs = true
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+    "pydocstyle.*"
+]
+ignore_missing_imports = true
+
+[tool.pydocstyle]
+### Ignoring explanation
+# D104 - Missing docstring in public package
+# D107 - Missing docstring in __init__
+# D200 - One-line docstring should fit on one line with quotes
+# D203 - 1 blank line required before class docstring
+# D212 - Multi-line docstring summary should start at the first line
+ignore = """
+D104,D107,
+D200,D203,D212
+"""
