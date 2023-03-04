@@ -137,8 +137,7 @@ class Argument:
         lower_arg_type = arg_type.lower()
         return (
             arg_type in chain(_BASIC_TYPES_MAPPING, CUSTOM_TYPES_MAPPING)
-            or
-            lower_arg_type in chain(_BASIC_TYPES_MAPPING, CUSTOM_TYPES_MAPPING)
+            or lower_arg_type in chain(_BASIC_TYPES_MAPPING, CUSTOM_TYPES_MAPPING)
         )
 
 

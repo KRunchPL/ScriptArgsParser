@@ -7,7 +7,6 @@ This library is meant to provide an easy way to consume arguments for scripts in
 
 [![PyPI version](https://img.shields.io/pypi/v/script-args-parser)](https://pypi.org/project/script-args-parser/) [![Python](https://img.shields.io/pypi/pyversions/script-args-parser)](https://pypi.org/project/script-args-parser/)
 
-
 ## Why something more?
 
 In Python there are a lot of ways to consume cli parameters, starting from built-in parsers finishing at libraries like docopt. But unfortunately during my adventure I encountered a few problems that were not solvable just by using one of them. Few of those problems:
@@ -53,6 +52,7 @@ When all values are established, parser will convert them to specified type.
 ### Arguments definition
 
 The list of script arguments is provided in toml file. Example argument can look like this:
+
 ```toml
 [name]
 description = "Some fancy description"  # required
@@ -194,12 +194,14 @@ Type field value: `list[<simple type>]`
 Will produce a list of elements with given simple types (any that was described above).
 
 When this type is specified, multiple cli options should be used to pass list elements:
-```
+
+```shell script
 script.py --child-name John --child-name David
 ```
 
 In default value or environment variable use semicolon to split values:
-```
+
+```toml
 default_value = "John; David; 'Some;Very;Strange;Name'"
 ```
 
@@ -212,12 +214,14 @@ Example type field value: `tuple[str]`, `tuple[int, str, bool]`.
 Will produce a list with given amount of values of simple types elements.
 
 When this type is specified, cli options should be used once but with multiple values. For  `tuple[str, str, str]`
-```
+
+```shell script
 script.py --all-my-names John Maria "De'naban"
 ```
 
 In default value or environment variable separate values with space:
-```
+
+```toml
 default_value = "John Maria "De'naban"
 ```
 
@@ -228,12 +232,14 @@ Type field value: `list[tuple[<simple type>, <optional simple type>, ...]]`
 Combining list and tuple types. Will produce a list of lists.
 
 For cli use:
-```
+
+```shell script
 script.py --child John 16 --child David 18 --child Maria 21
 ```
 
 For default values and enviroment variables use:
-```
+
+```toml
 default_value = "John 16; David 18; Maria 21"
 ```
 
@@ -299,27 +305,27 @@ NOTE: Currently cli or env values are not supported for this type.
 
 Work that still need to be done prior to v1.0
 
-- [x] Default and envs for list
-- [x] Default and envs for tuple
-- [x] Default and envs for list of tuples
-- [x] Add more list of tuples tests
-- [x] Add path type (with tests)
-- [x] Create from path
-- [x] Support config file
-- [x] Document possible types
-- [ ] Add support for env and cli values for dataclass type
-- [ ] Write some complex test cases
-- [ ] Allow non-cli arguments
-- [ ] Add logging
-- [ ] Allow custom argument types
-- [ ] Generate usage
-- [ ] Error handling
-- [ ] TOML file validation
-- [ ] CI/CD
+* [x] Default and envs for list
+* [x] Default and envs for tuple
+* [x] Default and envs for list of tuples
+* [x] Add more list of tuples tests
+* [x] Add path type (with tests)
+* [x] Create from path
+* [x] Support config file
+* [x] Document possible types
+* [ ] Add support for env and cli values for dataclass type
+* [ ] Write some complex test cases
+* [ ] Allow non-cli arguments
+* [ ] Add logging
+* [ ] Allow custom argument types
+* [ ] Generate usage
+* [ ] Error handling
+* [ ] TOML file validation
+* [ ] CI/CD
 
 ## Contributing
 
-Right now I would like to finish what I planned by myself and release version 1.0. If you have any suggestions or you have found bugs, feel free to submit an issue and I will take a look at it as soon as possible.
+Right now I would like to finish what I planned by myself and release version 1.0. If you have any suggestions or you have found bugs, feel free to submit an issue and I will take a look at it as soon as possible. To save your and my time on discussions please provide a good description for them.
 
 ## Development
 
