@@ -1,6 +1,7 @@
 import os
 from dataclasses import asdict
 from tempfile import NamedTemporaryFile
+from typing import Any
 
 import pytest
 import toml
@@ -8,7 +9,7 @@ import toml
 from script_args_parser import ArgumentsParser
 
 
-def assert_argument_values(name, mapping_dict, argument_dict):
+def assert_argument_values(name: str, mapping_dict: dict[str, Any], argument_dict: dict[str, Any]) -> None:
     assert name == argument_dict['name']
     for k, v in mapping_dict.items():
         assert argument_dict[k] == v
@@ -67,7 +68,7 @@ def test_multiple_args():
 
 
 def test_default_required():
-    mappings = {
+    mappings: dict[str, Any] = {
         'first_arg': {
             'type': 'str',
             'description': 'Some fancy description',

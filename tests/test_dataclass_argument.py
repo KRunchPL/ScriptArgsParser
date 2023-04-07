@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any
 
 import pytest
 
@@ -38,7 +39,7 @@ def list_arguments_definition():
 
 
 def test_empty_list(list_arguments_definition):
-    user_values = {
+    user_values: dict[str, Any] = {
         'list': []
     }
     parser = ArgumentsParser(list_arguments_definition, user_values=user_values)

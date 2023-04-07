@@ -23,7 +23,7 @@ def arguments_definition():
 
 
 def test_no_value(arguments_definition):
-    cli = []
+    cli: list[str] = []
     parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['bool'] is None
 
@@ -74,7 +74,7 @@ def test_switch_but_no_value(arguments_definition):
 ])
 def test_no_cli_default_set(arguments_definition, default_value, expected_value):
     arguments_definition[0].default_value = default_value
-    cli = []
+    cli: list[str] = []
     parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['bool'] == expected_value
 
@@ -91,6 +91,6 @@ def test_no_cli_default_set(arguments_definition, default_value, expected_value)
 ])
 def test_no_cli_env_set(arguments_definition_with_env, env_var, env_value, expected_value):
     os.environ[env_var] = env_value
-    cli = []
+    cli: list[str] = []
     parser = ArgumentsParser(arguments_definition_with_env, cli)
     assert parser.arguments_values['bool'] == expected_value
