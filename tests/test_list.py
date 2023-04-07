@@ -40,37 +40,37 @@ def arguments_definition_int_with_env(arguments_definition_int, env_var_name):
 
 
 def test_no_value(arguments_definition):
-    cli = []
+    cli: list[str] = []
     parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['list'] is None
 
 
 def test_single_value(arguments_definition):
-    cli = ['--list-element', '123']
+    cli: list[str] = ['--list-element', '123']
     parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['list'] == ['123']
 
 
 def test_multiple_values(arguments_definition):
-    cli = ['--list-element', '123', '--list-element', '1410']
+    cli: list[str] = ['--list-element', '123', '--list-element', '1410']
     parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['list'] == ['123', '1410']
 
 
 def test_single_empty_value(arguments_definition):
-    cli = ['--list-element', '']
+    cli: list[str] = ['--list-element', '']
     parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['list'] == ['']
 
 
 def test_multiple_empty_values(arguments_definition):
-    cli = ['--list-element', '', '--list-element', '1410', '--list-element', '']
+    cli: list[str] = ['--list-element', '', '--list-element', '1410', '--list-element', '']
     parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['list'] == ['', '1410', '']
 
 
 def test_switch_but_no_value(arguments_definition):
-    cli = ['--list-element']
+    cli: list[str] = ['--list-element']
     with pytest.raises(SystemExit):
         ArgumentsParser(arguments_definition, cli)
 
@@ -108,7 +108,7 @@ def test_switch_but_no_value(arguments_definition):
 ])
 def test_no_cli_default_set(arguments_definition, default_value, expected_list):
     arguments_definition[0].default_value = default_value
-    cli = []
+    cli: list[str] = []
     parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['list'] == expected_list
 
@@ -119,7 +119,7 @@ def test_no_cli_default_set(arguments_definition, default_value, expected_list):
 ])
 def test_no_cli_default_set_parsing(arguments_definition_int, default_value, expected_list):
     arguments_definition_int[0].default_value = default_value
-    cli = []
+    cli: list[str] = []
     parser = ArgumentsParser(arguments_definition_int, cli)
     assert parser.arguments_values['list'] == expected_list
 
@@ -157,7 +157,7 @@ def test_no_cli_default_set_parsing(arguments_definition_int, default_value, exp
 ])
 def test_no_cli_env_set(arguments_definition_with_env, env_var, env_value, expected_list):
     os.environ[env_var] = env_value
-    cli = []
+    cli: list[str] = []
     parser = ArgumentsParser(arguments_definition_with_env, cli)
     assert parser.arguments_values['list'] == expected_list
 
@@ -170,6 +170,6 @@ def test_no_cli_env_set(arguments_definition_with_env, env_var, env_value, expec
 ])
 def test_no_cli_env_set_multiple_values(arguments_definition_int_with_env, env_var, env_value, expected_list):
     os.environ[env_var] = env_value
-    cli = []
+    cli: list[str] = []
     parser = ArgumentsParser(arguments_definition_int_with_env, cli)
     assert parser.arguments_values['list'] == expected_list

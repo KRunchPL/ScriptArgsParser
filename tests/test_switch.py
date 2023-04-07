@@ -23,19 +23,19 @@ def arguments_definition():
 
 
 def test_no_value(arguments_definition):
-    cli = []
+    cli: list[str] = []
     parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['is_there'] is None
 
 
 def test_single_switch(arguments_definition):
-    cli = ['--bool-switch']
+    cli: list[str] = ['--bool-switch']
     parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['is_there'] is True
 
 
 def test_multiple_switches(arguments_definition):
-    cli = ['--bool-switch', '--bool-switch']
+    cli: list[str] = ['--bool-switch', '--bool-switch']
     parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['is_there'] is True
 
@@ -51,7 +51,7 @@ def test_multiple_switches(arguments_definition):
     ('', False),
 ])
 def test_switch_with_value(arguments_definition, cli_value, expected_value):
-    cli = ['--bool-switch', str(cli_value)]
+    cli: list[str] = ['--bool-switch', str(cli_value)]
     parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['is_there'] == expected_value
 
@@ -68,7 +68,7 @@ def test_switch_with_value(arguments_definition, cli_value, expected_value):
 ])
 def test_no_cli_default_set(arguments_definition, default_value, expected_value):
     arguments_definition[0].default_value = default_value
-    cli = []
+    cli: list[str] = []
     parser = ArgumentsParser(arguments_definition, cli)
     assert parser.arguments_values['is_there'] == expected_value
 
@@ -85,6 +85,6 @@ def test_no_cli_default_set(arguments_definition, default_value, expected_value)
 ])
 def test_no_cli_env_set(arguments_definition_with_env, env_var, env_value, expected_value):
     os.environ[env_var] = env_value
-    cli = []
+    cli: list[str] = []
     parser = ArgumentsParser(arguments_definition_with_env, cli)
     assert parser.arguments_values['is_there'] == expected_value

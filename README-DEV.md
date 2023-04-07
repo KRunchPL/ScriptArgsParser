@@ -77,14 +77,6 @@ Full linting report in HTML form will be available in `flake8-report` directory.
 
 `isort` and `pydocstyle` configuration is in the `pyproject.toml` file.
 
-#### Docstrings checks
-
-`pydocstyle` is being run with `flake8`, but since the integration is done with this plugin, to make sure it does not contain errors, `pydocstyle` is also run separately.
-
-To check all python code use the `pydocstyle` command without any parameters in the main folder of the repo.
-
-`pydocstyle` configuration is in the `pyproject.toml` file.
-
 #### Typing checks
 
 `mypy` is the plugin of choice for typing checks on this repo.

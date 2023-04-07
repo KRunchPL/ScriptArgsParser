@@ -64,31 +64,31 @@ def arguments_definition_str_int_bool_with_env(arguments_definition_str_int_bool
 
 
 def test_no_value(arguments_definition_single_str):
-    cli = []
+    cli: list[str] = []
     parser = ArgumentsParser(arguments_definition_single_str, cli)
     assert parser.arguments_values['tuple'] is None
 
 
 def test_single_value(arguments_definition_single_str):
-    cli = ['--some-tuple', 'String Value']
+    cli: list[str] = ['--some-tuple', 'String Value']
     parser = ArgumentsParser(arguments_definition_single_str, cli)
     assert parser.arguments_values['tuple'] == ['String Value']
 
 
 def test_switch_but_no_value(arguments_definition_single_str):
-    cli = ['--some-tuple']
+    cli: list[str] = ['--some-tuple']
     with pytest.raises(SystemExit):
         ArgumentsParser(arguments_definition_single_str, cli)
 
 
 def test_not_enough_values_cli(arguments_definition_triple_str):
-    cli = ['--some-tuple', 'String Value', '123']
+    cli: list[str] = ['--some-tuple', 'String Value', '123']
     with pytest.raises(SystemExit):
         ArgumentsParser(arguments_definition_triple_str, cli)
 
 
 def test_too_much_values_cli(arguments_definition_triple_str):
-    cli = ['--some-tuple', 'String Value', '123', 'True', 'Other']
+    cli: list[str] = ['--some-tuple', 'String Value', '123', 'True', 'Other']
     with pytest.raises(SystemExit):
         ArgumentsParser(arguments_definition_triple_str, cli)
 
@@ -99,7 +99,7 @@ def test_too_much_values_cli(arguments_definition_triple_str):
     (['', '123', ''], ['', 123, False]),
 ])
 def test_parsing_values(arguments_definition_str_int_bool, cli_values, expected_list):
-    cli = ['--some-tuple'] + cli_values
+    cli: list[str] = ['--some-tuple'] + cli_values
     parser = ArgumentsParser(arguments_definition_str_int_bool, cli)
     assert parser.arguments_values['tuple'] == expected_list
 
@@ -111,21 +111,21 @@ def test_parsing_values(arguments_definition_str_int_bool, cli_values, expected_
 ])
 def test_no_cli_default_single_value(arguments_definition_single_str, default_value, expected_value):
     arguments_definition_single_str[0].default_value = default_value
-    cli = []
+    cli: list[str] = []
     parser = ArgumentsParser(arguments_definition_single_str, cli)
     assert parser.arguments_values['tuple'] == [expected_value]
 
 
 def test_no_cli_default_not_enough_values(arguments_definition_triple_str):
     arguments_definition_triple_str[0].default_value = "'Some default' 123"
-    cli = []
+    cli: list[str] = []
     with pytest.raises(RuntimeError):
         ArgumentsParser(arguments_definition_triple_str, cli)
 
 
 def test_no_cli_default_too_much_values(arguments_definition_triple_str):
     arguments_definition_triple_str[0].default_value = "'Some default', 123, True, Other"
-    cli = []
+    cli: list[str] = []
     with pytest.raises(RuntimeError):
         ArgumentsParser(arguments_definition_triple_str, cli)
 
@@ -137,7 +137,7 @@ def test_no_cli_default_too_much_values(arguments_definition_triple_str):
 ])
 def test_no_cli_default_parsing_values(arguments_definition_str_int_bool, default_value, expected_list):
     arguments_definition_str_int_bool[0].default_value = default_value
-    cli = []
+    cli: list[str] = []
     parser = ArgumentsParser(arguments_definition_str_int_bool, cli)
     assert parser.arguments_values['tuple'] == expected_list
 
@@ -152,21 +152,21 @@ def test_no_cli_env_single_value(
     arguments_definition_single_str_with_env, env_var, env_value, expected_value
 ):
     os.environ[env_var] = env_value
-    cli = []
+    cli: list[str] = []
     parser = ArgumentsParser(arguments_definition_single_str_with_env, cli)
     assert parser.arguments_values['tuple'] == [expected_value]
 
 
 def test_no_cli_env_not_enough_values(arguments_definition_triple_str_with_env, env_var):
     os.environ[env_var] = "'Some default' 123"
-    cli = []
+    cli: list[str] = []
     with pytest.raises(RuntimeError):
         ArgumentsParser(arguments_definition_triple_str_with_env, cli)
 
 
 def test_no_cli_env_too_much_values(arguments_definition_triple_str_with_env, env_var):
     os.environ[env_var] = "'Some default', 123, True, Other"
-    cli = []
+    cli: list[str] = []
     with pytest.raises(RuntimeError):
         ArgumentsParser(arguments_definition_triple_str_with_env, cli)
 
@@ -180,6 +180,6 @@ def test_no_cli_env_parsing_values(
     arguments_definition_str_int_bool_with_env, env_var, env_value, expected_list
 ):
     os.environ[env_var] = env_value
-    cli = []
+    cli: list[str] = []
     parser = ArgumentsParser(arguments_definition_str_int_bool_with_env, cli)
     assert parser.arguments_values['tuple'] == expected_list
