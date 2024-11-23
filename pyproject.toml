@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "script-args-parser"
-version = "1.0.0-dev"
+version = "0.4.1"
 description = "Script arguments parsing library."
 authors = ["KRunchPL <krunchfrompoland@gmail.com>"]
 readme = "README.md"

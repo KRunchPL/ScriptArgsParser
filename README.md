@@ -1,5 +1,11 @@
 # Script Arguments Parser
 
+[![ARCHIVED](https://img.shields.io/badge/ARCHIVED-red)](https://github.com/KRunchPL/script-args-parser/)
+
+The project is ARCHIVED, and it is no longer actively maintained.
+
+## Description
+
 This library is meant to provide an easy way to consume arguments for scripts in more complex scenarios without writing too much code.
 
 [![license](https://img.shields.io/github/license/KRunchPL/script-args-parser.svg)](https://github.com/KRunchPL/script-args-parser/blob/master/LICENSE)
